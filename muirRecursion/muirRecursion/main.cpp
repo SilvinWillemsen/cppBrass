@@ -219,13 +219,15 @@ Equation<M> A (int n, double r, int zPow, long& numRecursion)
 
 int main (int argc, const char * argv[]) {
 
-    const int M = 31;               // The starting number for n in the recursion (A_M(z^{-1},r))
+    const int M = 21;               // The starting number for n in the recursion (A_M(z^{-1},r))
     double r = 0.5;                 // The power of the fractional differentiation we want to approxiate
     int zPow = M % 2 == 1 ? -1 : 1; // Either start with z^1 (if M is even) or z^{-1} (if M is odd)
     long numRecursion = 0;          // The number of recursions it takes to solve
+    double fs = 1000.0;             // Sample rate
+    double k = 1.0 / fs;            // Time step
     
     //// SOLVE ////
-    Equation<M> numerator = A<M> (M, r, zPow, numRecursion);
+    Equation<M> numerator = pow (2.0 / k, r) * A<M> (M, r, zPow, numRecursion);
    
     // Print the coefficients
     numerator.printCoeffs();
