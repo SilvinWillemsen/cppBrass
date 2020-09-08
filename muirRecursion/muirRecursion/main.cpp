@@ -227,8 +227,8 @@ int main (int argc, const char * argv[]) {
     double k = 1.0 / fs;            // Time step
     
     //// SOLVE ////
-    Equation<M> numerator = pow (2.0 / k, r) * A<M> (M, r, zPow, numRecursion);
-   
+    Equation<M> numerator = A<M> (M, r, zPow, numRecursion);
+    numerator = pow (2.0 / k, r) * numerator;
     // Print the coefficients
     numerator.printCoeffs();
     
