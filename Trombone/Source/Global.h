@@ -38,7 +38,22 @@ namespace Global {
     static inline double subplus (double val) { return (val + abs(val)) * 0.5; };
     
     static inline int sgn (double val) { return (0 < val) - (val < 0); };
-
+    
+    static double clamp (double val, double min, double max)
+    {
+        if (val < min)
+        {
+            val = min;
+            return val;
+        }
+        else if (val > max)
+        {
+            val = max;
+            return val;
+        }
+        return val;
+    }
+    
     static double outputClamp (double val)
     {
         if (val < -1.0)

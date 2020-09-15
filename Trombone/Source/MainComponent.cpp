@@ -17,18 +17,31 @@ MainComponent::MainComponent()
     // specify the number of input and output channels that we want to open
     setAudioChannels (0, 2);
     startTimerHz (15);
+
 }
 
 MainComponent::~MainComponent()
 {
     // This shuts down the audio device and clears the audio source.
-    stopTimer();
+    Timer::stopTimer();
+    HighResolutionTimer::stopTimer();
+    // start the hi-res timer
     shutdownAudio();
+    
+    for (auto sensel : sensels)
+    {
+        if (sensel->senselDetected)
+        {
+            sensel->shutDown();
+        }
+    }
 }
 
 //==============================================================================
 void MainComponent::prepareToPlay (int samplesPerBlockExpected, double sampleRate)
 {
+    sensels.add (new Sensel (0)); // chooses the device in the sensel device list
+    
     fs = sampleRate;
     NamedValueSet parameters;
 
@@ -71,6 +84,10 @@ void MainComponent::prepareToPlay (int samplesPerBlockExpected, double sampleRat
     
     trombone = std::make_unique<Trombone> (parameters, 1.0 / fs);
     addAndMakeVisible (trombone.get());
+    
+    if (sensels.size() != 0)
+        if (sensels[0]->senselDetected)
+            HighResolutionTimer::startTimer (1000.0 / 150.0); // 150 Hz
     
     setSize (800, 600);
 
@@ -131,4 +148,47 @@ void MainComponent::resized()
 void MainComponent::timerCallback()
 {
     repaint();
+}
+
+void MainComponent::hiResTimerCallback()
+{
+    double maxPm = 30000.0;
+    double maxf0 = 1000.0;
+    for (auto sensel : sensels)
+    {
+        double finger0X = 0;
+        double finger0Y = 0;
+        if (sensel->senselDetected)
+        {
+            sensel->check();
+            unsigned int fingerCount = sensel->contactAmount;
+            int index = sensel->senselIndex;
+
+            for (int f = 0; f < fingerCount; f++)
+            {
+                bool state = sensel->fingers[f].state;
+                float x = sensel->fingers[f].x;
+                float y = sensel->fingers[f].y;
+                float Vb = -sensel->fingers[f].delta_y * 0.5;
+                float Pm = Global::clamp (sensel->fingers[f].force * 100000.0, 0, maxPm);
+                
+                int fingerID = sensel->fingers[f].fingerID;
+                //                std::cout << "Finger " << f << ": " << fingerID << std::endl;
+                //                trombaString->setFingerPos (0);
+                if (fingerID == 0 && state) //fingerID == 0)
+                {
+                    finger0X = x;
+                    finger0Y = y;
+                    double f0 = Global::clamp (x * maxf0, 0, maxf0);
+                    trombone->setParams (Pm, f0);
+                }
+            }
+            
+            if (fingerCount == 0)
+            {
+                trombone->setParams(0, trombone->getLipFreq());
+                
+            }
+        }
+    }
 }

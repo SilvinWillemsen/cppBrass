@@ -37,6 +37,8 @@ public:
 
     void refreshLipModelInputParams() { lipModel->refreshInputParams(); };
     
+    void setParams (double Pm, double f0) { lipModel->setDynamicParams (Pm, f0); };
+    double getLipFreq() { return lipModel->getLipFreq(); };
 private:
     std::unique_ptr<Tube> tube;
     std::unique_ptr<LipModel> lipModel;

@@ -4,6 +4,32 @@
               jucerFormatVersion="1">
   <MAINGROUP id="IDeYBB" name="Trombone">
     <GROUP id="{E745DC74-718C-303A-D03A-7B640AE5D1AB}" name="Source">
+      <GROUP id="{E653C0EF-1B4A-377E-CB69-6F8668845136}" name="SenselWrapper">
+        <GROUP id="{FCF62B74-C9E8-8A9C-4B9B-1E608317DB05}" name="lib">
+          <FILE id="Lxq6E0" name="sensel.c" compile="1" resource="0" file="Source/SenselWrapper/lib/sensel.c"/>
+          <FILE id="byQNGm" name="sensel.h" compile="0" resource="0" file="Source/SenselWrapper/lib/sensel.h"/>
+          <FILE id="CJkyAQ" name="sensel_device.h" compile="0" resource="0" file="Source/SenselWrapper/lib/sensel_device.h"/>
+          <FILE id="bKgh7p" name="sensel_device_vidpid.h" compile="0" resource="0"
+                file="Source/SenselWrapper/lib/sensel_device_vidpid.h"/>
+          <FILE id="jFoVKQ" name="sensel_protocol.h" compile="0" resource="0"
+                file="Source/SenselWrapper/lib/sensel_protocol.h"/>
+          <FILE id="AMhXQ2" name="sensel_register.c" compile="1" resource="0"
+                file="Source/SenselWrapper/lib/sensel_register.c"/>
+          <FILE id="AVVttY" name="sensel_register.h" compile="0" resource="0"
+                file="Source/SenselWrapper/lib/sensel_register.h"/>
+          <FILE id="ejLM5S" name="sensel_register_map.h" compile="0" resource="0"
+                file="Source/SenselWrapper/lib/sensel_register_map.h"/>
+          <FILE id="HdUmZG" name="sensel_serial.h" compile="0" resource="0" file="Source/SenselWrapper/lib/sensel_serial.h"/>
+          <FILE id="E6Srd9" name="sensel_serial_linux.c" compile="1" resource="0"
+                file="Source/SenselWrapper/lib/sensel_serial_linux.c"/>
+          <FILE id="H7X1VI" name="sensel_serial_win.c" compile="1" resource="0"
+                file="Source/SenselWrapper/lib/sensel_serial_win.c"/>
+          <FILE id="tnhnKw" name="sensel_types.h" compile="0" resource="0" file="Source/SenselWrapper/lib/sensel_types.h"/>
+        </GROUP>
+        <FILE id="CL66AN" name="LICENSE" compile="0" resource="1" file="Source/SenselWrapper/LICENSE"/>
+        <FILE id="aEKRth" name="README.md" compile="0" resource="1" file="Source/SenselWrapper/README.md"/>
+        <FILE id="cayHKN" name="SenselWrapper.h" compile="0" resource="0" file="Source/SenselWrapper/SenselWrapper.h"/>
+      </GROUP>
       <FILE id="y2i5BM" name="Global.h" compile="0" resource="0" file="Source/Global.h"/>
       <FILE id="rEWiB0" name="LipModel.cpp" compile="1" resource="0" file="Source/LipModel.cpp"/>
       <FILE id="zcqaak" name="LipModel.h" compile="0" resource="0" file="Source/LipModel.h"/>
