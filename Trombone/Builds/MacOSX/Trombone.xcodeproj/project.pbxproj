@@ -380,13 +380,6 @@
 			path = ../../Source/MainComponent.cpp;
 			sourceTree = "SOURCE_ROOT";
 		};
-		9997407949FDFD7040CCB144 = {
-			isa = PBXFileReference;
-			lastKnownFileType = file;
-			name = "juce_audio_basics";
-			path = "../../../newJUCE/JUCE/modules/juce_audio_basics";
-			sourceTree = "SOURCE_ROOT";
-		};
 		9F94F8EB0AFB4D5CF44B6D67 = {
 			isa = PBXFileReference;
 			lastKnownFileType = file;
@@ -527,6 +520,13 @@
 			path = "../../JuceLibraryCode/include_juce_audio_utils.mm";
 			sourceTree = "SOURCE_ROOT";
 		};
+		EE87E0B7155D6C0A2B875052 = {
+			isa = PBXFileReference;
+			lastKnownFileType = file;
+			name = "juce_audio_basics";
+			path = "../../../../../newJUCE/JUCE/modules/juce_audio_basics";
+			sourceTree = "SOURCE_ROOT";
+		};
 		F417F133F04E298207AE7BBF = {
 			isa = PBXFileReference;
 			lastKnownFileType = sourcecode.cpp.objcpp;
@@ -583,7 +583,7 @@
 		4BD9C8D051AF3061D82B8375 = {
 			isa = PBXGroup;
 			children = (
-				9997407949FDFD7040CCB144,
+				EE87E0B7155D6C0A2B875052,
 				E5FD4A502342E34B306B168E,
 				A1716F76946AF8C15903F637,
 				7B6E33DEF25094953C75F5B8,
@@ -706,6 +706,7 @@
 				GCC_VERSION = com.apple.compilers.llvm.clang.1_0;
 				HEADER_SEARCH_PATHS = (
 					"../../JuceLibraryCode",
+					"../../../../../newJUCE/JUCE/modules",
 					"../../../newJUCE/JUCE/modules",
 					"$(inherited)",
 				);
@@ -749,6 +750,7 @@
 				GCC_VERSION = com.apple.compilers.llvm.clang.1_0;
 				HEADER_SEARCH_PATHS = (
 					"../../JuceLibraryCode",
+					"../../../../../newJUCE/JUCE/modules",
 					"../../../newJUCE/JUCE/modules",
 					"$(inherited)",
 				);

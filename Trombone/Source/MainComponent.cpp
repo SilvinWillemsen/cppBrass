@@ -31,7 +31,7 @@ void MainComponent::prepareToPlay (int samplesPerBlockExpected, double sampleRat
 {
     fs = sampleRate;
     NamedValueSet parameters;
-    
+
     //// Tube ////
     parameters.set ("T", 26.85);
     parameters.set ("L", 2.658);

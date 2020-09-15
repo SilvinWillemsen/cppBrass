@@ -12,7 +12,9 @@
 #include "Tube.h"
 
 //==============================================================================
-Tube::Tube (NamedValueSet& parameters, double k) : k (k), L (*parameters.getVarPointer("L"))
+Tube::Tube (NamedValueSet& parameters, double k) : k (k),
+L (*parameters.getVarPointer("L")),
+T (*parameters.getVarPointer("T"))
 {
     calculateThermodynamicConstants();
     
@@ -61,7 +63,7 @@ Tube::Tube (NamedValueSet& parameters, double k) : k (k), L (*parameters.getVarP
     
     // Radiation
     R1 = rho * c;
-    rL = sqrt(SBar[N-1]) / (2.0 * double_Pi);
+    rL = radii[N-1];
     Lr = 0.613 * rho * rL;
     R2 = 0.505 * rho * c;
     Cr = 1.111 * rL / (rho * c * c);
@@ -241,7 +243,8 @@ void Tube::calculateGeometry (NamedValueSet& parameters)
             S[i] = Global::linspace (mp, tubeS, m2tL, i-mpL);
         else if (i >= mpL + m2tL && i < N - bellL)
             S[i] = tubeS;
-        else
+        else    // formula from bell taken from T. Smyth "Trombone synthesis by model and measurement"
+
             S[N-1-(i - (N - bellL))] = pow(b * pow(((i - (N - bellL)) / (2.0 * bellL) + x0), -flare), 2) * double_Pi;
     }
     
@@ -263,31 +266,33 @@ void Tube::calculateRadii()
     radii.resize (N, 0);
     for (int i = 0; i < N; ++i)
         radii[i] = sqrt (S[i]) / double_Pi;
-    
+  
 }
+
 double Tube::getKinEnergy()
 {
     double kinEnergy = 0;
-    for (int i = 0; i < N; ++i)
-    {
-        kinEnergy += 1.0 / (2.0 * rho * c * c) * h * (SBar[i] * p[1][i] * p[1][i] * (i == 0 || i == N-1 ? 0.5 : 1));
-    }
+    for (int i = 0; i < N-1; ++i)
+        kinEnergy += rho * 0.5 * h * (SHalf[i] * v[0][i] * v[1][i]);
+    
     if (kinEnergy1 < 0)
         kinEnergy1 = kinEnergy;
+    
     return kinEnergy;
-
 }
+
 
 double Tube::getPotEnergy()
 {
     double potEnergy = 0;
-    for (int i = 0; i < N-1; ++i)
-        potEnergy += rho * 0.5 * h * (SHalf[i] * v[0][i] * v[1][i]);
-    
+    for (int i = 0; i < N; ++i)
+    {
+        potEnergy += 1.0 / (2.0 * rho * c * c) * h * (SBar[i] * p[1][i] * p[1][i] * (i == 0 || i == N-1 ? 0.5 : 1));
+    }
     if (potEnergy1 < 0)
         potEnergy1 = potEnergy;
-    
     return potEnergy;
+
 }
 
 double Tube::getRadEnergy()
