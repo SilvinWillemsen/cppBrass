@@ -42,6 +42,5 @@ private:
     std::unique_ptr<Trombone> trombone;
     double fs;
     OwnedArray<Sensel> sensels;
-
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (MainComponent)
 };

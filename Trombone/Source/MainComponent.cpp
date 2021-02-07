@@ -50,17 +50,25 @@ void MainComponent::prepareToPlay (int samplesPerBlockExpected, double sampleRat
     parameters.set ("L", 2.658);
 
     // Geometry
-    parameters.set ("mp", 0.015 * 0.015 * double_Pi);                   // mouthpiece cross-sectional area
-    parameters.set ("mpL", 0.01);                   // mouthpiece length (length ratio)
-    parameters.set ("m2tL", 0.01);                  // mouthpiece to tube (length ratio)
-    parameters.set ("tubeS", 0.01 * 0.01 * double_Pi);                 // tube cross-sectional area
+    parameters.set ("inner1Rad", 0.0069); // Rad first inner tube
+    parameters.set ("slideRad", 0.0072);  // Rad slide
+    parameters.set ("inner2Rad", 0.0069); // Rad second inner tube
+    parameters.set ("gooseNeckRad", 0.0071); // Rad gooseneck
+    parameters.set ("tuningRad1", 0.0075); // First rad tuning slide
+    parameters.set ("tuningRad2", 0.0107); // Second rad tuning slide
+    
+    parameters.set ("inner1L", 0.708); // Length first inner tube
+    parameters.set ("slideL", 0.177);  // Slide length (non-extended)
+    parameters.set ("inner2L", 0.711); // Length first inner tube
+    parameters.set ("gooseNeckL", 0.241); // Rad gooseneck
+    parameters.set ("tuningL", 0.254); // First rad tuning slide
+    parameters.set ("bellL", 0.502); // Second rad tuning slide
     
     // formula from bell taken from T. Smyth "Trombone synthesis by model and measurement"
     
     parameters.set ("flare", 0.7);                 // flare (exponent coeff)
     parameters.set ("x0", 0.0174);                    // position of bell mouth (exponent coeff)
     parameters.set ("b", 0.0063);                   // fitting parameter
-    parameters.set ("bellL", 0.21);                  // bell (length ratio)
     
     //// Lip ////
     double f0 = 300.0;
@@ -76,8 +84,8 @@ void MainComponent::prepareToPlay (int samplesPerBlockExpected, double sampleRat
     parameters.set("w", 1e-2);                      // lip width
     parameters.set("Sr", 1.46e-5);                  // lip area
     
-    parameters.set ("Kcol", 10000);
-    parameters.set ("alphaCol", 3);
+    parameters.set ("Kcol", 100);
+    parameters.set ("alphaCol", 5);
     
     //// Input ////
     parameters.set ("Pm", 300 * Global::pressureMultiplier);
@@ -89,7 +97,7 @@ void MainComponent::prepareToPlay (int samplesPerBlockExpected, double sampleRat
         if (sensels[0]->senselDetected)
             HighResolutionTimer::startTimer (1000.0 / 150.0); // 150 Hz
     
-    setSize (800, 600);
+    setSize (1000, 800);
 
 }
 
@@ -152,7 +160,7 @@ void MainComponent::timerCallback()
 
 void MainComponent::hiResTimerCallback()
 {
-    double maxPm = 30000.0;
+    double maxPm = 3000.0 * Global::pressureMultiplier;
     double maxf0 = 1000.0;
     for (auto sensel : sensels)
     {
@@ -162,20 +170,17 @@ void MainComponent::hiResTimerCallback()
         {
             sensel->check();
             unsigned int fingerCount = sensel->contactAmount;
-            int index = sensel->senselIndex;
 
             for (int f = 0; f < fingerCount; f++)
             {
                 bool state = sensel->fingers[f].state;
                 float x = sensel->fingers[f].x;
                 float y = sensel->fingers[f].y;
-                float Vb = -sensel->fingers[f].delta_y * 0.5;
-                float Pm = Global::clamp (sensel->fingers[f].force * 100000.0, 0, maxPm);
+                float Pm = Global::clamp (sensel->fingers[f].force * 10000.0 * Global::pressureMultiplier, 0, maxPm);
                 
                 int fingerID = sensel->fingers[f].fingerID;
-                //                std::cout << "Finger " << f << ": " << fingerID << std::endl;
-                //                trombaString->setFingerPos (0);
-                if (fingerID == 0 && state) //fingerID == 0)
+                
+                if (fingerID == 0 && state)
                 {
                     finger0X = x;
                     finger0Y = y;
@@ -186,8 +191,7 @@ void MainComponent::hiResTimerCallback()
             
             if (fingerCount == 0)
             {
-                trombone->setParams(0, trombone->getLipFreq());
-                
+                trombone->setParams (0, trombone->getLipFreq());
             }
         }
     }

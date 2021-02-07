@@ -22,14 +22,14 @@ public:
     Tube (NamedValueSet& parameters, double k);
     ~Tube() override;
 
-    Path drawGeometry (Graphics& g, int topOrBottom);
+    void drawGeometry (Graphics& g);
     Path visualiseState (Graphics& g, double visualScaling);
     void paint (juce::Graphics&) override;
     void resized() override;
 
     void calculateThermodynamicConstants();
     void calculateGeometry (NamedValueSet& parameters);
-    void calculateRadii();
+//    void calculateRadii();
     void calculateVelocity();
     void calculatePressure();
     void calculateRadiation();
@@ -60,7 +60,7 @@ public:
 
 private:
     double k, h, c, lambda, rho, L, T;
-    int N;
+    int N, NnonExtended;
     
     // Radiation vars
     double R1, rL, Lr, R2, Cr, z1, z2, z3, z4;
@@ -81,7 +81,7 @@ private:
     std::vector<std::vector<double>> uVecs;
     
     // tube geometry
-    std::vector<double> S, SHalf, SBar, oOSBar, radii;
+    std::vector<double> S, SHalf, SBar, oOSBar, rLVec;
     
     double* vTmp = nullptr;
     double* pTmp = nullptr;
@@ -93,5 +93,6 @@ private:
     
     double qHRadPrev = 0;
 
+    
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (Tube)
 };

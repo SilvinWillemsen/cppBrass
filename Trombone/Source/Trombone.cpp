@@ -49,7 +49,7 @@ void Trombone::resized()
     // This method is where you should set the bounds of any child
     // components that your component contains..
     Rectangle<int> totArea = getLocalBounds();
-    tube->setBounds (totArea.removeFromTop (getHeight() * 0.5));
+    tube->setBounds (totArea.removeFromTop (600));
     lipModel->setBounds (totArea);
 
 }

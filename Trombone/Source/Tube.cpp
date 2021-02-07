@@ -21,7 +21,7 @@ T (*parameters.getVarPointer("T"))
     h = c * k;
     N = floor(L / h);
     h = L / static_cast<double> (N);
-    
+    NnonExtended = N; // assuming that the initialisation happens with L = 2.658
     lambda = c * k / h;
     lambdaOverRhoC = lambda / (rho * c);
     
@@ -59,11 +59,11 @@ T (*parameters.getVarPointer("T"))
     }
     
     calculateGeometry (parameters);
-    calculateRadii();
+//    calculateRadii();
     
     // Radiation
     R1 = rho * c;
-    rL = radii[N-1];
+    rL = rLVec[N-1];
     Lr = 0.613 * rho * rL;
     R2 = 0.505 * rho * c;
     Cr = 1.111 * rL / (rho * c * c);
@@ -100,14 +100,11 @@ void Tube::paint (juce::Graphics& g)
        drawing code..
     */
 
-//    if (init)
-//    {
-        g.setColour (Colours::gold);
-        Path stringPathTop = drawGeometry (g, -1);
-        Path stringPathBottom = drawGeometry (g, 1);
-        g.strokePath (stringPathTop, PathStrokeType(2.0f));
-        g.strokePath (stringPathBottom, PathStrokeType(2.0f));
-        init = false;
+    g.setColour (Colours::gold);
+    drawGeometry (g);
+//        Path stringPathBottom = drawGeometry (g, 1);
+//        g.fillPath (stringPathTop);
+//        g.strokePath (stringPathBottom, PathStrokeType(2.0f));
 //    }
     g.setColour (Colours::cyan);
     Path state = visualiseState (g, 0.01 * Global::oOPressureMultiplier);
@@ -118,21 +115,56 @@ void Tube::paint (juce::Graphics& g)
 
 }
 
-Path Tube::drawGeometry (Graphics& g, int topOrBottom)
+void Tube::drawGeometry (Graphics& g)
 {
     double visualScaling = 1000.0;
+    double colourScaling = 1.0 / 10.0;
+
     Path stringPath;
-    stringPath.startNewSubPath (0, topOrBottom * radii[0] * visualScaling + getHeight() * 0.5);
-    int stateWidth = getWidth();
-    auto spacing = stateWidth / static_cast<double>(N - 1);
+    stringPath.startNewSubPath (0, -rLVec[0] * visualScaling + getHeight() * 0.5);
+    auto spacing = getWidth() / static_cast<double>(N - 1);
     auto x = spacing;
+    auto oONm1 = 1.0 / static_cast<double>(N);
+    auto xRat = oONm1;
+    int flag = 0;
+    int topOrBottom = 1;
+    ColourGradient cg (Colour (Global::clamp(255 + p[1][0] * colourScaling, 0, 255),
+                               Global::clamp(255 - abs(p[1][0] * colourScaling), 0, 255),
+                               Global::clamp(255 - p[1][0] * colourScaling, 0, 255)), getX(), getY(),
+                       Colours::white, getWidth(), getY(),
+                       false);
+
     
-    for (int y = 1; y < N; y++)
+    for (int y = 1; y < 2 * N; y++)
     {
-        stringPath.lineTo(x, topOrBottom * radii[y] * visualScaling + getHeight() * 0.5);
-        x += spacing;
+        if (y < N)
+        {
+            topOrBottom = 1;
+        } else {
+            flag = 1;
+            topOrBottom = -1;
+        }
+        
+        stringPath.lineTo (x, -topOrBottom * rLVec[2 * (N - 0.5) * flag + topOrBottom * y] * visualScaling + getHeight() * 0.5);
+        x += topOrBottom * spacing;
+
+        if (y < N)
+        {
+            cg.addColour (xRat, Colour (Global::clamp (255 + p[1][y] * colourScaling, 0, 255),
+                                        Global::clamp (255 - abs(p[1][y] * colourScaling), 0, 255),
+                                        Global::clamp (255 - p[1][y] * colourScaling, 0, 255)));
+            xRat += oONm1;
+        }
+            
     }
-    return stringPath;
+    stringPath.lineTo (0, rLVec[0] * visualScaling + getHeight() * 0.5);
+    stringPath.closeSubPath();
+
+    g.setColour (Colours::gold);
+    g.strokePath (stringPath, PathStrokeType(2.0f));
+    g.setGradientFill (cg);
+    g.fillPath (stringPath);
+    
 }
 
 Path Tube::visualiseState (Graphics& g, double visualScaling)
@@ -140,8 +172,8 @@ Path Tube::visualiseState (Graphics& g, double visualScaling)
     auto stringBounds = getHeight() / 2.0;
     Path stringPath;
     stringPath.startNewSubPath (0, -p[1][0] * visualScaling + stringBounds);
-    int stateWidth = getWidth();
-    auto spacing = stateWidth / static_cast<double>(N - 1);
+
+    auto spacing = getWidth() / static_cast<double>(N - 1);
     auto x = spacing;
     
     for (int y = 1; y < N; y++)
@@ -223,51 +255,88 @@ void Tube::calculateGeometry (NamedValueSet& parameters)
     SHalf.resize (N-1, 0);
     SBar.resize (N, 0);
     oOSBar.resize (N, 0);
+    rLVec.resize (N, 0);
+    std::vector<double> lengths;
+    std::vector<double> lengthN;
+    std::vector<double> radii;
     
-    double mp = *parameters.getVarPointer ("mp");
-    double tubeS = *parameters.getVarPointer ("tubeS");
-
-    int mpL = N * double (*parameters.getVarPointer ("mpL"));
-    int m2tL = N * double (*parameters.getVarPointer ("m2tL"));
-    int bellL = N * double (*parameters.getVarPointer ("bellL"));
+    radii.push_back (*parameters.getVarPointer ("inner1Rad")); // Rad first inner tube
+    radii.push_back (*parameters.getVarPointer ("slideRad"));  // Rad slide
+    radii.push_back (*parameters.getVarPointer ("inner2Rad")); // Rad second inner tube
+    radii.push_back (*parameters.getVarPointer ("gooseNeckRad")); // Rad gooseneck
+    radii.push_back (*parameters.getVarPointer ("tuningRad1")); // First rad tuning slide
+    radii.push_back (*parameters.getVarPointer ("tuningRad2")); // Second rad tuning slide
+    
+    lengths.push_back (*parameters.getVarPointer ("inner1L")); // Length first inner tube
+    lengths.push_back (*parameters.getVarPointer ("slideL"));  // Slide length (non-extended)
+    lengths.push_back (*parameters.getVarPointer ("inner2L")); // Length first inner tube
+    lengths.push_back (*parameters.getVarPointer ("gooseNeckL")); // Rad gooseneck
+    lengths.push_back (*parameters.getVarPointer ("tuningL")); // First rad tuning slide
+    lengths.push_back (*parameters.getVarPointer ("bellL")); // Second rad tuning slide
+    
+    double sumLengths = 0;
+    for (int i = 0; i < lengths.size(); ++i)
+    {
+        sumLengths += lengths[i];
+    }
+    
+//    for (int i = 0; i < radii.size(); ++i)
+//    {
+//        radii[i] = radii[i] * radii[i] * double_Pi; // convert to S
+//    }
+    
+    for (int i = 0; i < lengths.size(); ++i)
+    {
+        lengthN.push_back (round ((NnonExtended * lengths[i]) / sumLengths));
+    }
+    
+    lengthN[1] += (N - NnonExtended);
+    lengthN[5] += 1;
     
     double flare = *parameters.getVarPointer ("flare");
     double x0 = *parameters.getVarPointer ("x0");
     double b = *parameters.getVarPointer ("b");
+    int idx = 0;
+    int j = 0;
+    while (j < lengths.size())
+    {
+        for (int i = 0; i < lengthN[j]; ++i)
+        {
+            if (j < 4)
+                rLVec[idx] = radii[j];
+            else if (j == 4)
+                rLVec[idx] = Global::linspace (radii[j], radii[j+1], lengthN[j], i);
+            else
+                rLVec[N - 1 - i] = b * pow((i / (lengthN[j]) * lengths[j] + x0), -flare);
+            
+            ++idx;
+        }
+        ++j;
+    }
 
     for (int i = 0; i < N; ++i)
-    {
-        if (i < mpL)
-            S[i] = mp;
-        else if (i >= mpL && i < mpL + m2tL)
-            S[i] = Global::linspace (mp, tubeS, m2tL, i-mpL);
-        else if (i >= mpL + m2tL && i < N - bellL)
-            S[i] = tubeS;
-        else    // formula from bell taken from T. Smyth "Trombone synthesis by model and measurement"
-
-            S[N-1-(i - (N - bellL))] = pow(b * pow(((i - (N - bellL)) / (2.0 * bellL) + x0), -flare), 2) * double_Pi;
-    }
+        S[i] = rLVec[i] * rLVec[i] * double_Pi;
     
     for (int i = 0; i < N - 1; ++i)
         SHalf[i] = (S[i] + S[i+1]) * 0.5;
-    
+
     SBar[0] = S[0];
     
     for (int i = 0; i < N - 2; ++i)
         SBar[i+1] = (SHalf[i] + SHalf[i+1]) * 0.5;
-    
+
     SBar[N-1] = S[N-1];
     for (int i = 0; i < N; ++i)
         oOSBar[i] = 1.0 / SBar[i];
 }
 
-void Tube::calculateRadii()
-{
-    radii.resize (N, 0);
-    for (int i = 0; i < N; ++i)
-        radii[i] = sqrt (S[i]) / double_Pi;
-  
-}
+//void Tube::calculateRadii()
+//{
+//    radii.resize (N, 0);
+//    for (int i = 0; i < N; ++i)
+//        radii[i] = sqrt (S[i]) / double_Pi;
+//  
+//}
 
 double Tube::getKinEnergy()
 {
