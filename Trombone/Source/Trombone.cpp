@@ -74,32 +74,40 @@ void Trombone::calculate()
     tube->calculatePressure();
     tube->calculateRadiation();
     
-    calculateEnergy();
+//#if DEBUG == 1
+//    calculateEnergy();
+//#endif
 }
 
 void Trombone::calculateEnergy()
 {
     bool excludeLip = !Global::connectedToLip;
+//    bool excludeLip = false;
+
     double kinEnergy = tube->getKinEnergy();
     double potEnergy = tube->getPotEnergy();
     double radEnergy = tube->getRadEnergy();
+    double radDamp = tube->getRadDampEnergy();
     double lipEnergy = lipModel->getLipEnergy();
     double lipCollisionEnergy = lipModel->getCollisionEnergy();
+    double lipPower = lipModel->getPower();
+    double lipDamp = lipModel->getDampEnergy();
+    
     double totEnergy = kinEnergy + potEnergy + radEnergy + (excludeLip ? 0 : (lipEnergy + lipCollisionEnergy));
     double energy1 = tube->getKinEnergy1() + tube->getPotEnergy1() + tube->getRadEnergy1() + (excludeLip ? 0 : (lipModel->getLipEnergy1() + lipModel->getCollisionEnergy1()));
     
     energySave << kinEnergy << ", ";
     energySave << potEnergy << ", ";
     energySave << radEnergy << ", ";
+    energySave << radDamp << ", ";
     energySave << lipEnergy << ", ";
     energySave << lipCollisionEnergy << ", ";
-    energySave << lipModel->getPower() << ", ";
-    energySave << lipModel->getDampEnergy() << ", ";
-    energySave << tube->getRadDampEnergy() << ", ";
+    energySave << lipPower << ", ";
+    energySave << lipDamp << ", ";
     energySave << energy1 << ";\n";
 
-    
-    scaledTotEnergy = (totEnergy + lipModel->getPower() + lipModel->getDampEnergy() + tube->getRadDampEnergy() - energy1) / pow(2, floor (log2 (energy1)));
+//     scaledTotEnergy = (totEnergy + lipModel->getPower() + lipModel->getDampEnergy() + tube->getRadDampEnergy() - energy1) / energy1;
+    scaledTotEnergy = (totEnergy + lipPower + lipDamp + radDamp - energy1) / pow(2, floor (log2 (energy1)));
     scaledTotEnergySave << scaledTotEnergy << ";\n";
 }
 

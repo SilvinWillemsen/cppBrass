@@ -126,7 +126,7 @@ private:
     double potEnergy1 = -1;
     double radEnergy1 = -1;
 
-    bool raisedCos = false;
+    bool raisedCos = true;
     bool init = true;
     
     double qHRadPrev = 0;

@@ -39,6 +39,7 @@ LipModel::LipModel (NamedValueSet& parameters, double k) : k (k),
         pressureVal = Pm;
     else
         pressureVal = 0;
+//    Pm = 0;
     // In your constructor, you should add any child components, and
     // initialise any special settings that your component needs.
     oOk = 1.0 / k;

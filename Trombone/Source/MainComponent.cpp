@@ -61,14 +61,14 @@ void MainComponent::prepareToPlay (int samplesPerBlockExpected, double sampleRat
     parameters.set("Mr", 5.37e-5);                  // mass lips
     parameters.set("omega0", 2.0 * double_Pi * f0); // angular freq
     
-    parameters.set("sigmaR", 0);                    // damping
+    parameters.set("sigmaR", 5);                    // damping
     parameters.set("H0", H0);                       // equilibrium
     parameters.set("barrier", -H0);                 // equilibrium
 
     parameters.set("w", 1e-2);                      // lip width
     parameters.set("Sr", 1.46e-5);                  // lip area
     
-    parameters.set ("Kcol", 100);
+    parameters.set ("Kcol", 10000);
     parameters.set ("alphaCol", 3);
     
     //// Input ////
