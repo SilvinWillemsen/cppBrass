@@ -17,8 +17,6 @@ LipModel::LipModel (NamedValueSet& parameters, double k) : k (k),
                                             omega0 (*parameters.getVarPointer ("omega0")),
                                             M (*parameters.getVarPointer ("Mr")),
                                             sig (*parameters.getVarPointer ("sigmaR")),
-                                            Sr (*parameters.getVarPointer ("Sr")),
-                                            w (*parameters.getVarPointer ("w")),
                                             Kcol (*parameters.getVarPointer ("Kcol")),
                                             alpha (*parameters.getVarPointer ("alphaCol")),
                                             H0 (*parameters.getVarPointer ("H0")),
@@ -26,6 +24,17 @@ LipModel::LipModel (NamedValueSet& parameters, double k) : k (k),
                                             Pm (*parameters.getVarPointer ("Pm"))
 
 {
+    if (Global::connectedToLip)
+    {
+        Sr  = *parameters.getVarPointer ("Sr");
+        w = *parameters.getVarPointer ("w");
+        yPrev = H0;
+    } else {
+        w = 0;
+        Sr = 0;
+        yPrev = 0;
+    }
+    
     pressureVal = Pm;
     // In your constructor, you should add any child components, and
     // initialise any special settings that your component needs.
@@ -42,7 +51,6 @@ LipModel::LipModel (NamedValueSet& parameters, double k) : k (k),
     psiPrev = 0;
     
     y = 0;
-    yPrev = H0;
 }
 
 LipModel::~LipModel()

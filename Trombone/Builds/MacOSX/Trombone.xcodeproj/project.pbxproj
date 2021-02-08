@@ -53,6 +53,10 @@
 			isa = PBXBuildFile;
 			fileRef = 31F614D8369F047D3B8B73C8;
 		};
+		2CCE17329335B06E1C29559C = {
+			isa = PBXBuildFile;
+			fileRef = CF6C2C170E0723E387BB53B2;
+		};
 		1A3CB251D579F6BAFEA2181C = {
 			isa = PBXBuildFile;
 			fileRef = 739B9F5490E4F88482BCA74F;
@@ -596,6 +600,13 @@
 			path = ../../Source/Tube.h;
 			sourceTree = "SOURCE_ROOT";
 		};
+		CF6C2C170E0723E387BB53B2 = {
+			isa = PBXFileReference;
+			lastKnownFileType = wrapper.framework;
+			name = Foundation.framework;
+			path = System/Library/Frameworks/Foundation.framework;
+			sourceTree = SDKROOT;
+		};
 		D150916A21EE5942F1FCFBB7 = {
 			isa = PBXFileReference;
 			lastKnownFileType = file;
@@ -819,6 +830,7 @@
 				3ACEDD47364B80435CC12831,
 				152737DB578962B2388F4AA4,
 				31F614D8369F047D3B8B73C8,
+				CF6C2C170E0723E387BB53B2,
 				739B9F5490E4F88482BCA74F,
 				66A34E5460CC7AE93070A33C,
 				95573847BBECFBE26B143561,
@@ -877,18 +889,25 @@
 				);
 				GCC_VERSION = com.apple.compilers.llvm.clang.1_0;
 				HEADER_SEARCH_PATHS = (
-					"../../JuceLibraryCode",
-					"../../../../../newJUCE/JUCE/modules",
-					"../../../newJUCE/JUCE/modules",
+					"$(SRCROOT)/../../JuceLibraryCode",
+					"$(SRCROOT)/../../../../../newJUCE/JUCE/modules",
+					"$(SRCROOT)/../../../newJUCE/JUCE/modules",
 					"$(inherited)",
 				);
 				INFOPLIST_FILE = Info-App.plist;
 				INFOPLIST_PREPROCESS = NO;
 				INSTALL_PATH = "$(HOME)/Applications";
 				MACOSX_DEPLOYMENT_TARGET = 10.11;
+				MTL_HEADER_SEARCH_PATHS = (
+					"$(SRCROOT)/../../JuceLibraryCode",
+					"$(SRCROOT)/../../../../../newJUCE/JUCE/modules",
+					"$(SRCROOT)/../../../newJUCE/JUCE/modules",
+				);
 				PRODUCT_BUNDLE_IDENTIFIER = com.yourcompany.Trombone;
 				PRODUCT_NAME = "Trombone";
 				USE_HEADERMAP = NO;
+				VALIDATE_WORKSPACE_SKIPPED_SDK_FRAMEWORKS = OpenGL;
+				VALID_ARCHS = "i386 x86_64 arm64 arm64e";
 			};
 			name = Debug;
 		};
@@ -921,9 +940,9 @@
 				);
 				GCC_VERSION = com.apple.compilers.llvm.clang.1_0;
 				HEADER_SEARCH_PATHS = (
-					"../../JuceLibraryCode",
-					"../../../../../newJUCE/JUCE/modules",
-					"../../../newJUCE/JUCE/modules",
+					"$(SRCROOT)/../../JuceLibraryCode",
+					"$(SRCROOT)/../../../../../newJUCE/JUCE/modules",
+					"$(SRCROOT)/../../../newJUCE/JUCE/modules",
 					"$(inherited)",
 				);
 				INFOPLIST_FILE = Info-App.plist;
@@ -931,9 +950,16 @@
 				INSTALL_PATH = "$(HOME)/Applications";
 				LLVM_LTO = YES;
 				MACOSX_DEPLOYMENT_TARGET = 10.11;
+				MTL_HEADER_SEARCH_PATHS = (
+					"$(SRCROOT)/../../JuceLibraryCode",
+					"$(SRCROOT)/../../../../../newJUCE/JUCE/modules",
+					"$(SRCROOT)/../../../newJUCE/JUCE/modules",
+				);
 				PRODUCT_BUNDLE_IDENTIFIER = com.yourcompany.Trombone;
 				PRODUCT_NAME = "Trombone";
 				USE_HEADERMAP = NO;
+				VALIDATE_WORKSPACE_SKIPPED_SDK_FRAMEWORKS = OpenGL;
+				VALID_ARCHS = "i386 x86_64 arm64 arm64e";
 			};
 			name = Release;
 		};
@@ -1106,6 +1132,7 @@
 				77B880D9BDF29E7A0A7BB2D8,
 				D00C8363201A408DE9194F16,
 				65951DC3CD35C850FD414834,
+				2CCE17329335B06E1C29559C,
 				1A3CB251D579F6BAFEA2181C,
 				3CA62319F479601208474DD4,
 				94E71B780AF27ECD0EEC29BA,
@@ -1131,7 +1158,7 @@
 		F8DB7C9F86629FACE9E73FD4 = {
 			isa = PBXProject;
 			buildConfigurationList = 1AAC7C2C558754D4A742D90C;
-			attributes = { LastUpgradeCheck = 1100; ORGANIZATIONNAME = ""; TargetAttributes = { 09780D27B1FA7A3E876DD2D6 = { SystemCapabilities = {com.apple.ApplicationGroups.iOS = { enabled = 0; }; com.apple.InAppPurchase = { enabled = 0; }; com.apple.InterAppAudio = { enabled = 0; }; com.apple.Push = { enabled = 0; }; com.apple.Sandbox = { enabled = 0; }; com.apple.HardenedRuntime = { enabled = 0; }; }; }; }; };
+			attributes = { LastUpgradeCheck = 1230; ORGANIZATIONNAME = ""; TargetAttributes = { 09780D27B1FA7A3E876DD2D6 = { SystemCapabilities = {com.apple.ApplicationGroups.iOS = { enabled = 0; }; com.apple.InAppPurchase = { enabled = 0; }; com.apple.InterAppAudio = { enabled = 0; }; com.apple.Push = { enabled = 0; }; com.apple.Sandbox = { enabled = 0; }; com.apple.HardenedRuntime = { enabled = 0; }; }; }; }; };
 			compatibilityVersion = "Xcode 3.2";
 			hasScannedForEncodings = 0;
 			mainGroup = 9FC5A767C504AD71D3DD20E2;

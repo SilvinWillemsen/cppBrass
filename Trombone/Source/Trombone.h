@@ -14,14 +14,14 @@
 #include "Global.h"
 #include "Tube.h"
 #include "LipModel.h"
-
+#include <fstream>
 //==============================================================================
 /*
 */
 class Trombone  : public juce::Component
 {
 public:
-    Trombone (NamedValueSet& parameters, double k);
+    Trombone (NamedValueSet& parameters, double k, std::vector<std::vector<double>>& geometry);
     ~Trombone() override;
 
     void paint (juce::Graphics&) override;
@@ -33,16 +33,20 @@ public:
     float getOutput() { return tube->getOutput(); };
     float getLipOutput() { return lipModel->getY(); };
     
+    void saveToFiles();
+    void closeFiles();
     void updateStates();
 
     void refreshLipModelInputParams() { lipModel->refreshInputParams(); };
     
-    void setParams (double Pm, double f0) { lipModel->setDynamicParams (Pm, f0); };
-    double getLipFreq() { return lipModel->getLipFreq(); };
 private:
     std::unique_ptr<Tube> tube;
     std::unique_ptr<LipModel> lipModel;
     
     double k, Pm;
+    
+    double scaledTotEnergy = 0;
+    
+    std::ofstream massState, pState, vState, MSave, MwSave, energySave;
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (Trombone)
 };

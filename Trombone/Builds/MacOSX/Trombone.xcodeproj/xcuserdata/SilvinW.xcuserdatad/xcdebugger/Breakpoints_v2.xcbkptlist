@@ -79,7 +79,7 @@
             endingColumnNumber = "9223372036854775807"
             startingLineNumber = "293"
             endingLineNumber = "293"
-            landmarkName = "Tube::calculateGeometry (NamedValueSet&amp; parameters)"
+            landmarkName = "Tube::updateStates()"
             landmarkType = "7">
          </BreakpointContent>
       </BreakpointProxy>
@@ -95,7 +95,7 @@
             endingColumnNumber = "9223372036854775807"
             startingLineNumber = "61"
             endingLineNumber = "61"
-            landmarkName = "Tube::Tube (NamedValueSet&amp; parameters, double k)"
+            landmarkName = "Tube::Tube (NamedValueSet&amp; parameters, double k, std::vector&lt;std::vector&lt;double&gt;&gt;&amp; geometry)"
             landmarkType = "7">
          </BreakpointContent>
       </BreakpointProxy>
@@ -111,7 +111,7 @@
             endingColumnNumber = "9223372036854775807"
             startingLineNumber = "254"
             endingLineNumber = "254"
-            landmarkName = "Tube::calculateGeometry (NamedValueSet&amp; parameters)"
+            landmarkName = "Tube::calculateVelocity()"
             landmarkType = "7">
          </BreakpointContent>
       </BreakpointProxy>
@@ -127,7 +127,7 @@
             endingColumnNumber = "9223372036854775807"
             startingLineNumber = "296"
             endingLineNumber = "296"
-            landmarkName = "Tube::calculateGeometry (NamedValueSet&amp; parameters)"
+            landmarkName = "Tube::updateStates()"
             landmarkType = "7">
          </BreakpointContent>
       </BreakpointProxy>
@@ -143,7 +143,7 @@
             endingColumnNumber = "9223372036854775807"
             startingLineNumber = "297"
             endingLineNumber = "297"
-            landmarkName = "Tube::calculateGeometry (NamedValueSet&amp; parameters)"
+            landmarkName = "Tube::updateStates()"
             landmarkType = "7">
          </BreakpointContent>
       </BreakpointProxy>
@@ -175,7 +175,7 @@
             endingColumnNumber = "9223372036854775807"
             startingLineNumber = "218"
             endingLineNumber = "218"
-            landmarkName = "Tube::calculateVelocity()"
+            landmarkName = "Tube::visualiseState (Graphics&amp; g, double visualScaling)"
             landmarkType = "7">
          </BreakpointContent>
       </BreakpointProxy>
@@ -271,7 +271,7 @@
             endingColumnNumber = "9223372036854775807"
             startingLineNumber = "240"
             endingLineNumber = "240"
-            landmarkName = "Tube::updateStates()"
+            landmarkName = "Tube::calculateVelocity()"
             landmarkType = "7">
          </BreakpointContent>
       </BreakpointProxy>
@@ -287,7 +287,7 @@
             endingColumnNumber = "9223372036854775807"
             startingLineNumber = "52"
             endingLineNumber = "52"
-            landmarkName = "Tube::Tube (NamedValueSet&amp; parameters, double k)"
+            landmarkName = "Tube::Tube (NamedValueSet&amp; parameters, double k, std::vector&lt;std::vector&lt;double&gt;&gt;&amp; geometry)"
             landmarkType = "7">
          </BreakpointContent>
       </BreakpointProxy>
@@ -303,7 +303,7 @@
             endingColumnNumber = "9223372036854775807"
             startingLineNumber = "53"
             endingLineNumber = "53"
-            landmarkName = "Tube::Tube (NamedValueSet&amp; parameters, double k)"
+            landmarkName = "Tube::Tube (NamedValueSet&amp; parameters, double k, std::vector&lt;std::vector&lt;double&gt;&gt;&amp; geometry)"
             landmarkType = "7">
          </BreakpointContent>
       </BreakpointProxy>
@@ -319,7 +319,7 @@
             endingColumnNumber = "9223372036854775807"
             startingLineNumber = "28"
             endingLineNumber = "28"
-            landmarkName = "Tube::Tube (NamedValueSet&amp; parameters, double k)"
+            landmarkName = "Tube::Tube (NamedValueSet&amp; parameters, double k, std::vector&lt;std::vector&lt;double&gt;&gt;&amp; geometry)"
             landmarkType = "7">
          </BreakpointContent>
       </BreakpointProxy>
@@ -463,7 +463,7 @@
             endingColumnNumber = "9223372036854775807"
             startingLineNumber = "29"
             endingLineNumber = "29"
-            landmarkName = "Tube::Tube (NamedValueSet&amp; parameters, double k)"
+            landmarkName = "Tube::Tube (NamedValueSet&amp; parameters, double k, std::vector&lt;std::vector&lt;double&gt;&gt;&amp; geometry)"
             landmarkType = "7">
          </BreakpointContent>
       </BreakpointProxy>
@@ -479,7 +479,7 @@
             endingColumnNumber = "9223372036854775807"
             startingLineNumber = "65"
             endingLineNumber = "65"
-            landmarkName = "Tube::Tube (NamedValueSet&amp; parameters, double k)"
+            landmarkName = "Tube::Tube (NamedValueSet&amp; parameters, double k, std::vector&lt;std::vector&lt;double&gt;&gt;&amp; geometry)"
             landmarkType = "7">
          </BreakpointContent>
       </BreakpointProxy>
@@ -495,7 +495,7 @@
             endingColumnNumber = "9223372036854775807"
             startingLineNumber = "66"
             endingLineNumber = "66"
-            landmarkName = "Tube::Tube (NamedValueSet&amp; parameters, double k)"
+            landmarkName = "Tube::Tube (NamedValueSet&amp; parameters, double k, std::vector&lt;std::vector&lt;double&gt;&gt;&amp; geometry)"
             landmarkType = "7">
          </BreakpointContent>
       </BreakpointProxy>
@@ -623,7 +623,7 @@
             endingColumnNumber = "9223372036854775807"
             startingLineNumber = "298"
             endingLineNumber = "298"
-            landmarkName = "Tube::calculateGeometry (NamedValueSet&amp; parameters)"
+            landmarkName = "Tube::updateStates()"
             landmarkType = "7">
          </BreakpointContent>
       </BreakpointProxy>
@@ -639,7 +639,7 @@
             endingColumnNumber = "9223372036854775807"
             startingLineNumber = "310"
             endingLineNumber = "310"
-            landmarkName = "Tube::calculateGeometry (NamedValueSet&amp; parameters)"
+            landmarkName = "Tube::updateStates()"
             landmarkType = "7">
          </BreakpointContent>
       </BreakpointProxy>
@@ -655,7 +655,7 @@
             endingColumnNumber = "9223372036854775807"
             startingLineNumber = "328"
             endingLineNumber = "328"
-            landmarkName = "Tube::calculateGeometry (NamedValueSet&amp; parameters)"
+            landmarkName = "Tube::calculateGeometry (std::vector&lt;std::vector&lt;double&gt;&gt;&amp; geometry, NamedValueSet&amp; parameters)"
             landmarkType = "7">
          </BreakpointContent>
       </BreakpointProxy>
@@ -671,8 +671,8 @@
             endingColumnNumber = "9223372036854775807"
             startingLineNumber = "314"
             endingLineNumber = "314"
-            landmarkName = "Tube::calculateGeometry (NamedValueSet&amp; parameters)"
-            landmarkType = "7">
+            landmarkName = "unknown"
+            landmarkType = "0">
          </BreakpointContent>
       </BreakpointProxy>
       <BreakpointProxy
@@ -703,7 +703,7 @@
             endingColumnNumber = "9223372036854775807"
             startingLineNumber = "320"
             endingLineNumber = "320"
-            landmarkName = "Tube::calculateGeometry (NamedValueSet&amp; parameters)"
+            landmarkName = "Tube::calculateGeometry (std::vector&lt;std::vector&lt;double&gt;&gt;&amp; geometry, NamedValueSet&amp; parameters)"
             landmarkType = "7">
          </BreakpointContent>
       </BreakpointProxy>
@@ -719,7 +719,7 @@
             endingColumnNumber = "9223372036854775807"
             startingLineNumber = "148"
             endingLineNumber = "148"
-            landmarkName = "Tube::drawGeometry (Graphics&amp; g)"
+            landmarkName = "Tube::paint (juce::Graphics&amp; g)"
             landmarkType = "7">
          </BreakpointContent>
       </BreakpointProxy>
@@ -735,7 +735,7 @@
             endingColumnNumber = "9223372036854775807"
             startingLineNumber = "144"
             endingLineNumber = "144"
-            landmarkName = "Tube::drawGeometry (Graphics&amp; g)"
+            landmarkName = "Tube::paint (juce::Graphics&amp; g)"
             landmarkType = "7">
          </BreakpointContent>
       </BreakpointProxy>
@@ -751,7 +751,7 @@
             endingColumnNumber = "9223372036854775807"
             startingLineNumber = "145"
             endingLineNumber = "145"
-            landmarkName = "Tube::drawGeometry (Graphics&amp; g)"
+            landmarkName = "Tube::paint (juce::Graphics&amp; g)"
             landmarkType = "7">
          </BreakpointContent>
       </BreakpointProxy>

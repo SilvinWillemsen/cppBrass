@@ -15,6 +15,10 @@ namespace Global {
     static double pressureMultiplier = 10.0;
     static double oOPressureMultiplier = 1.0 / pressureMultiplier;
 
+    static bool setTubeTo1 = false;
+    static bool connectedToLip = false;
+    static bool dontInterpolateAtStart = true;
+    
     static std::vector<double> linspace (double start, double finish, int N)
     {
         std::vector<double> res (N, 0);
@@ -38,22 +42,7 @@ namespace Global {
     static inline double subplus (double val) { return (val + abs(val)) * 0.5; };
     
     static inline int sgn (double val) { return (0 < val) - (val < 0); };
-    
-    static double clamp (double val, double min, double max)
-    {
-        if (val < min)
-        {
-            val = min;
-            return val;
-        }
-        else if (val > max)
-        {
-            val = max;
-            return val;
-        }
-        return val;
-    }
-    
+
     static double outputClamp (double val)
     {
         if (val < -1.0)

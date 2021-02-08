@@ -19,27 +19,48 @@
 class Tube  : public juce::Component
 {
 public:
-    Tube (NamedValueSet& parameters, double k);
+    Tube (NamedValueSet& parameters, double k, std::vector<std::vector<double>>& geometry);
     ~Tube() override;
 
-    void drawGeometry (Graphics& g);
+    Path drawGeometry (Graphics& g, int topOrBottom);
     Path visualiseState (Graphics& g, double visualScaling);
     void paint (juce::Graphics&) override;
     void resized() override;
 
     void calculateThermodynamicConstants();
-    void calculateGeometry (NamedValueSet& parameters);
-//    void calculateRadii();
+    int calculateGeometry (std::vector<std::vector<double>>& geometry, NamedValueSet& parameters);
+    void calculateRadii();
     void calculateVelocity();
     void calculatePressure();
     void calculateRadiation();
 
-    void setFlowVelocities (double UbIn, double UrIn) { Ub = UbIn; Ur = UrIn; };
+    void setFlowVelocities (double UbIn, double UrIn)
+    {
+        Ub = UbIn;
+        Ur = UrIn;
+    };
     float getOutput() { return getP (1, N-1); };
+    
     void updateStates();
     
-    double getP (int n, int l) { return p[n][l]; };
-    double getV (int n, int l) { return v[n][l]; };
+    double getP (int n, int l) {
+        if (l <= M)
+            return up[n][l];
+        else
+            return wp[n][l-M-1];
+    };
+    double getV (int n, int l) {
+        if (l <= M-1)
+            return uv[n][l];
+        else
+            return wv[n][l-M-1];
+    };
+    
+    int getNint() { return Nint; };
+    float getN() { return N; };
+
+    int getM() { return M; };
+    int getMw() { return Mw; };
 
     double getH() { return h; };
     double getRho() { return rho; };
@@ -60,7 +81,9 @@ public:
 
 private:
     double k, h, c, lambda, rho, L, T;
-    int N, NnonExtended;
+    int Nint, M, Mw;
+    int NnonExtended;
+    float N;
     
     // Radiation vars
     double R1, rL, Lr, R2, Cr, z1, z2, z3, z4;
@@ -70,29 +93,42 @@ private:
     double Ub, Ur;
     
     double lambdaOverRhoC;
-    std::vector<std::vector<double>> vVecs;
-    std::vector<std::vector<double>> pVecs;
+    std::vector<std::vector<double>> uvVecs;
+    std::vector<std::vector<double>> upVecs;
+    
+    std::vector<std::vector<double>> wvVecs;
+    std::vector<std::vector<double>> wpVecs;
+
+    
+    double upMP1, wpm1, uvNextMPh, uvMPh, wvNextmh, wvmh;
 
     // pointers to states
-    std::vector<double*> v;
-    std::vector<double*> p;
+    std::vector<double*> uv;
+    std::vector<double*> up;
+    
+    std::vector<double*> wv;
+    std::vector<double*> wp;
 
     // states
     std::vector<std::vector<double>> uVecs;
-    
+    std::vector<std::vector<double>> wVecs;
+
     // tube geometry
-    std::vector<double> S, SHalf, SBar, oOSBar, rLVec;
+    std::vector<double> S, SHalf, SBar, oOSBar, radii;
     
-    double* vTmp = nullptr;
-    double* pTmp = nullptr;
-    
-    double kinEnergy1, potEnergy1, radEnergy1 = -1;
+    double* uvTmp = nullptr;
+    double* upTmp = nullptr;
+    double* wvTmp = nullptr;
+    double* wpTmp = nullptr;
+
+    double kinEnergy1 = -1;
+    double potEnergy1 = -1;
+    double radEnergy1 = -1;
 
     bool raisedCos = false;
     bool init = true;
     
     double qHRadPrev = 0;
 
-    
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (Tube)
 };

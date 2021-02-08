@@ -17,58 +17,42 @@ MainComponent::MainComponent()
     // specify the number of input and output channels that we want to open
     setAudioChannels (0, 2);
     startTimerHz (15);
-
 }
 
 MainComponent::~MainComponent()
 {
     // This shuts down the audio device and clears the audio source.
-    Timer::stopTimer();
-    HighResolutionTimer::stopTimer();
-    // start the hi-res timer
+    stopTimer();
     shutdownAudio();
-    
-    for (auto sensel : sensels)
-    {
-        if (sensel->senselDetected)
-        {
-            sensel->shutDown();
-        }
-    }
 }
 
 //==============================================================================
 void MainComponent::prepareToPlay (int samplesPerBlockExpected, double sampleRate)
 {
-    sensels.add (new Sensel (0)); // chooses the device in the sensel device list
-    
     fs = sampleRate;
     NamedValueSet parameters;
-
+    
     //// Tube ////
     parameters.set ("T", 26.85);
     parameters.set ("L", 2.658);
+    parameters.set ("LnonExtended", 2.658);
 
     // Geometry
-    parameters.set ("inner1Rad", 0.0069); // Rad first inner tube
-    parameters.set ("slideRad", 0.0072);  // Rad slide
-    parameters.set ("inner2Rad", 0.0069); // Rad second inner tube
-    parameters.set ("gooseNeckRad", 0.0071); // Rad gooseneck
-    parameters.set ("tuningRad1", 0.0075); // First rad tuning slide
-    parameters.set ("tuningRad2", 0.0107); // Second rad tuning slide
+//    parameters.set ("mp", 0.015 * 0.015 * double_Pi);                   // mouthpiece cross-sectional area
+//    parameters.set ("mpL", 0.01);                   // mouthpiece length (length ratio)
+//    parameters.set ("m2tL", 0.01);                  // mouthpiece to tube (length ratio)
+//    parameters.set ("tubeS", 0.01 * 0.01 * double_Pi);                 // tube cross-sectional area
     
-    parameters.set ("inner1L", 0.708); // Length first inner tube
-    parameters.set ("slideL", 0.177);  // Slide length (non-extended)
-    parameters.set ("inner2L", 0.711); // Length first inner tube
-    parameters.set ("gooseNeckL", 0.241); // Rad gooseneck
-    parameters.set ("tuningL", 0.254); // First rad tuning slide
-    parameters.set ("bellL", 0.502); // Second rad tuning slide
-    
-    // formula from bell taken from T. Smyth "Trombone synthesis by model and measurement"
+    // Geometric information including formula from bell taken from T. Smyth "Trombone synthesis by model and measurement"
+    geometry = {
+        {0.708, 0.177, 0.711, 0.306, 0.254, 0.502},         // lengths (changed fourth entry to account for bell length "error" in paper)
+        {0.0069, 0.0072, 0.0069, 0.0071, 0.0075, 0.0107}    // radii
+    };
     
     parameters.set ("flare", 0.7);                 // flare (exponent coeff)
     parameters.set ("x0", 0.0174);                    // position of bell mouth (exponent coeff)
     parameters.set ("b", 0.0063);                   // fitting parameter
+    parameters.set ("bellL", 0.21);                  // bell (length ratio)
     
     //// Lip ////
     double f0 = 300.0;
@@ -84,20 +68,16 @@ void MainComponent::prepareToPlay (int samplesPerBlockExpected, double sampleRat
     parameters.set("w", 1e-2);                      // lip width
     parameters.set("Sr", 1.46e-5);                  // lip area
     
-    parameters.set ("Kcol", 100);
-    parameters.set ("alphaCol", 5);
+    parameters.set ("Kcol", 10000);
+    parameters.set ("alphaCol", 3);
     
     //// Input ////
     parameters.set ("Pm", 300 * Global::pressureMultiplier);
     
-    trombone = std::make_unique<Trombone> (parameters, 1.0 / fs);
+    trombone = std::make_unique<Trombone> (parameters, 1.0 / fs, geometry);
     addAndMakeVisible (trombone.get());
     
-    if (sensels.size() != 0)
-        if (sensels[0]->senselDetected)
-            HighResolutionTimer::startTimer (1000.0 / 150.0); // 150 Hz
-    
-    setSize (1000, 800);
+    setSize (800, 600);
 
 }
 
@@ -120,10 +100,16 @@ void MainComponent::getNextAudioBlock (const AudioSourceChannelInfo& bufferToFil
     {
         trombone->calculate();
         output = trombone->getOutput() * 0.001 * Global::oOPressureMultiplier;
+        trombone->saveToFiles();
         trombone->updateStates();
-        channelData1[i] = Global::outputClamp (output);
-        channelData2[i] = Global::outputClamp (output);
-
+//        channelData1[i] = Global::outputClamp (output);
+//        channelData2[i] = Global::outputClamp (output);
+        ++t;
+    }
+    if (t > 1000)
+    {
+        trombone->closeFiles();
+        std::cout << "done" << std::endl;
     }
     trombone->refreshLipModelInputParams();
 }
@@ -156,43 +142,4 @@ void MainComponent::resized()
 void MainComponent::timerCallback()
 {
     repaint();
-}
-
-void MainComponent::hiResTimerCallback()
-{
-    double maxPm = 3000.0 * Global::pressureMultiplier;
-    double maxf0 = 1000.0;
-    for (auto sensel : sensels)
-    {
-        double finger0X = 0;
-        double finger0Y = 0;
-        if (sensel->senselDetected)
-        {
-            sensel->check();
-            unsigned int fingerCount = sensel->contactAmount;
-
-            for (int f = 0; f < fingerCount; f++)
-            {
-                bool state = sensel->fingers[f].state;
-                float x = sensel->fingers[f].x;
-                float y = sensel->fingers[f].y;
-                float Pm = Global::clamp (sensel->fingers[f].force * 10000.0 * Global::pressureMultiplier, 0, maxPm);
-                
-                int fingerID = sensel->fingers[f].fingerID;
-                
-                if (fingerID == 0 && state)
-                {
-                    finger0X = x;
-                    finger0Y = y;
-                    double f0 = Global::clamp (x * maxf0, 0, maxf0);
-                    trombone->setParams (Pm, f0);
-                }
-            }
-            
-            if (fingerCount == 0)
-            {
-                trombone->setParams (0, trombone->getLipFreq());
-            }
-        }
-    }
 }

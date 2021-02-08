@@ -12,58 +12,88 @@
 #include "Tube.h"
 
 //==============================================================================
-Tube::Tube (NamedValueSet& parameters, double k) : k (k),
-L (*parameters.getVarPointer("L")),
-T (*parameters.getVarPointer("T"))
+Tube::Tube (NamedValueSet& parameters, double k, std::vector<std::vector<double>>& geometry) : k (k), L (*parameters.getVarPointer("L")), T (*parameters.getVarPointer("T"))
 {
     calculateThermodynamicConstants();
     
     h = c * k;
-    N = floor(L / h);
-    h = L / static_cast<double> (N);
-    NnonExtended = N; // assuming that the initialisation happens with L = 2.658
+    NnonExtended = floor (static_cast<double>(*parameters.getVarPointer("LnonExtended")) / h);
+    
+    N = L / h;
+    if (Global::dontInterpolateAtStart)
+    {
+        L = floor(N) * h;
+        N = L / h;
+    }
+    Nint = floor(N);
+//    h = L / Nint;
+    
+    M = calculateGeometry (geometry, parameters);
+    Mw = Nint-M;
+
+    calculateRadii();
+
     lambda = c * k / h;
     lambdaOverRhoC = lambda / (rho * c);
     
     // initialise state vectors
-    vVecs.resize (2);
-    pVecs.resize (2);
+    uvVecs.resize (2);
+    upVecs.resize (2);
 
+    wvVecs.resize (2);
+    wpVecs.resize (2);
+
+//    M = ceil (N*0.5);
+//    Mw = floor (N*0.5);
     for (int i = 0; i < 2; ++i)
     {
-        vVecs[i] = std::vector<double> (N, 0);
-        pVecs[i] = std::vector<double> (N, 0);
+        // need to change to proper sizes
+        uvVecs[i] = std::vector<double> (M, 0);
+        upVecs[i] = std::vector<double> (M+1, 0);
+        wvVecs[i] = std::vector<double> (Mw, 0);
+        wpVecs[i] = std::vector<double> (Mw+1, 0);
+
     }
     
-    if (raisedCos)
+    if (raisedCos || !Global::connectedToLip)
     {
-        int start = N * 0.5 - 5;
-        int end = N * 0.5 + 5;
-        double scaling = 100000.0;
+        //        int start = N * 0.25 - 5;
+        //        int end = N * 0.25 + 5;
+        int start = 20;
+        int end = 30;
+        
+        double scaling = 1.0;
         for (int n = 0; n < 2; ++n)
         {
             for (int l = start; l < end; ++l)
             {
-                pVecs[n][l] = scaling * (1.0 - cos (2.0 * double_Pi * (l-start) / static_cast<float>(end - start))) * 0.5;
+                upVecs[n][l] = scaling * (1.0 - cos (2.0 * double_Pi * (l-start) / static_cast<float>(end - start))) * 0.5;
             }
         }
     }
     
-    v.resize (2);
-    p.resize (2);
+    uv.resize (2);
+    up.resize (2);
+    
+    wv.resize (2);
+    wp.resize (2);
 
     for (int i = 0; i < 2; ++i)
     {
-        v[i] = &vVecs[i][0];
-        p[i] = &pVecs[i][0];
+        uv[i] = &uvVecs[i][0];
+        up[i] = &upVecs[i][0];
+        wv[i] = &wvVecs[i][0];
+        wp[i] = &wpVecs[i][0];
+
     }
-    
-    calculateGeometry (parameters);
-//    calculateRadii();
+    uvMPh = 0;
+    wvmh = 0;
+    upMP1 = 0;
+    wpm1 = 0;
     
     // Radiation
     R1 = rho * c;
-    rL = rLVec[N-1];
+    rL = sqrt(SBar[Nint]) / (2.0 * double_Pi);
     Lr = 0.613 * rho * rL;
     R2 = 0.505 * rho * c;
     Cr = 1.111 * rL / (rho * c * c);
@@ -100,14 +130,17 @@ void Tube::paint (juce::Graphics& g)
        drawing code..
     */
 
-    g.setColour (Colours::gold);
-    drawGeometry (g);
-//        Path stringPathBottom = drawGeometry (g, 1);
-//        g.fillPath (stringPathTop);
-//        g.strokePath (stringPathBottom, PathStrokeType(2.0f));
+//    if (init)
+//    {
+        g.setColour (Colours::gold);
+        Path stringPathTop = drawGeometry (g, -1);
+        Path stringPathBottom = drawGeometry (g, 1);
+        g.strokePath (stringPathTop, PathStrokeType(2.0f));
+        g.strokePath (stringPathBottom, PathStrokeType(2.0f));
+        init = false;
 //    }
     g.setColour (Colours::cyan);
-    Path state = visualiseState (g, 0.01 * Global::oOPressureMultiplier);
+    Path state = visualiseState (g, (Global::setTubeTo1 ? 10000 : 0.01) * Global::oOPressureMultiplier);
     g.strokePath (state, PathStrokeType (2.0f));
 
     
@@ -115,79 +148,70 @@ void Tube::paint (juce::Graphics& g)
 
 }
 
-void Tube::drawGeometry (Graphics& g)
+Path Tube::drawGeometry (Graphics& g, int topOrBottom)
 {
     double visualScaling = 1000.0;
-    double colourScaling = 1.0 / 10.0;
-
     Path stringPath;
-    stringPath.startNewSubPath (0, -rLVec[0] * visualScaling + getHeight() * 0.5);
-    auto spacing = getWidth() / static_cast<double>(N - 1);
+    stringPath.startNewSubPath (0, topOrBottom * radii[0] * visualScaling + getHeight() * 0.5);
+    int stateWidth = getWidth();
+    auto spacing = stateWidth / static_cast<double>(Nint - 1);
     auto x = spacing;
-    auto oONm1 = 1.0 / static_cast<double>(N);
-    auto xRat = oONm1;
-    int flag = 0;
-    int topOrBottom = 1;
-    ColourGradient cg (Colour (Global::clamp(255 + p[1][0] * colourScaling, 0, 255),
-                               Global::clamp(255 - abs(p[1][0] * colourScaling), 0, 255),
-                               Global::clamp(255 - p[1][0] * colourScaling, 0, 255)), getX(), getY(),
-                       Colours::white, getWidth(), getY(),
-                       false);
-
     
-    for (int y = 1; y < 2 * N; y++)
+    for (int y = 1; y < Nint; y++)
     {
-        if (y < N)
-        {
-            topOrBottom = 1;
-        } else {
-            flag = 1;
-            topOrBottom = -1;
-        }
-        
-        stringPath.lineTo (x, -topOrBottom * rLVec[2 * (N - 0.5) * flag + topOrBottom * y] * visualScaling + getHeight() * 0.5);
-        x += topOrBottom * spacing;
-
-        if (y < N)
-        {
-            cg.addColour (xRat, Colour (Global::clamp (255 + p[1][y] * colourScaling, 0, 255),
-                                        Global::clamp (255 - abs(p[1][y] * colourScaling), 0, 255),
-                                        Global::clamp (255 - p[1][y] * colourScaling, 0, 255)));
-            xRat += oONm1;
-        }
-            
+        stringPath.lineTo(x, topOrBottom * radii[y] * visualScaling + getHeight() * 0.5);
+        x += spacing;
     }
-    stringPath.lineTo (0, rLVec[0] * visualScaling + getHeight() * 0.5);
-    stringPath.closeSubPath();
-
-    g.setColour (Colours::gold);
-    g.strokePath (stringPath, PathStrokeType(2.0f));
-    g.setGradientFill (cg);
-    g.fillPath (stringPath);
-    
+    return stringPath;
 }
 
 Path Tube::visualiseState (Graphics& g, double visualScaling)
 {
     auto stringBounds = getHeight() / 2.0;
     Path stringPath;
-    stringPath.startNewSubPath (0, -p[1][0] * visualScaling + stringBounds);
-
-    auto spacing = getWidth() / static_cast<double>(N - 1);
+    stringPath.startNewSubPath (0, -up[1][0] * visualScaling + stringBounds);
+    int stateWidth = getWidth();
+    auto spacing = stateWidth / static_cast<double>(Nint - 1);
     auto x = spacing;
+    bool switchToW = false;
     
-    for (int y = 1; y < N; y++)
+    for (int y = 1; y <= Nint + 1; y++)
     {
-        float newY = -p[1][y] * visualScaling + stringBounds; // Needs to be -p, because a positive p would visually go down
-        
-        if (isnan(x) || isinf(abs(x) || isnan(p[1][y]) || isinf(abs(p[1][y]))))
+        float newY;
+        if (y <= M)
         {
-            std::cout << "Wait" << std::endl;
-        };
+            newY = -up[1][y] * visualScaling + stringBounds; // Needs to be -p, because a positive p would visually go down
+//            if (y == M-1)
+//            {
+//                std::cout << x;
+//            }
+            if (isnan(x) || isinf(abs(x) || isnan(up[1][y]) || isinf(abs(up[1][y]))))
+            {
+                std::cout << "Wait" << std::endl;
+            };
+            
+        } else {
+            if (!switchToW)
+            {
+                x -= spacing;
+                switchToW = true;
+            }
+            newY = -wp[1][y-M] * visualScaling + stringBounds; // Needs to be -p, because a positive p would visually go down
+//            if (y == M)
+//            {
+//                std::cout << ", " << x << std::endl;;
+//            }
+            if (isnan(x) || isinf(abs(x) || isnan(wp[1][y-M]) || isinf(abs(wp[1][y-M]))))
+            {
+                std::cout << "Wait" << std::endl;
+            };
+
+        }
+       
         
         if (isnan(newY))
             newY = 0;
-        stringPath.lineTo(x, newY);
+        stringPath.lineTo (x, newY);
         //        g.drawEllipse(x, newY, 2, 2, 5);
         x += spacing;
     }
@@ -214,159 +238,221 @@ void Tube::calculateThermodynamicConstants()
 
 void Tube::calculateVelocity()
 {
-    for (int l = 0; l < N - 1; ++l)
-        v[0][l] = v[1][l] - lambdaOverRhoC * (p[1][l+1] - p[1][l]);
+    for (int l = 0; l < M; ++l)
+        uv[0][l] = uv[1][l] - lambdaOverRhoC * (up[1][l+1] - up[1][l]);
+    for (int l = 0; l < Mw; ++l)
+        wv[0][l] = wv[1][l] - lambdaOverRhoC * (wp[1][l+1] - wp[1][l]);
+    
+    double alf = N - Nint;
+    std::vector<double> quadIp (3, 0);
+    quadIp[0] = -(alf - 1) / (alf + 1);
+    quadIp[1] = 1;
+    quadIp[2] = (alf - 1) / (alf + 1);
+    
+    upMP1 = up[1][M] * quadIp[2]  + wp[1][0] * quadIp[1] + wp[1][1] * quadIp[0];
+    wpm1 = up[1][M-1] * quadIp[0] + up[1][M] * quadIp[1]  + wp[1][0] * quadIp[2];
+
+    uvNextMPh = uvMPh - lambda / (rho * c) * (upMP1 - up[1][M]);
+    wvNextmh = wvmh - lambda / (rho * c) * (wp[1][0] - wpm1);
+    
+
 }
 
 void Tube::calculatePressure()
 {
-    for (int l = 1; l < N - 1; ++l)
-        p[0][l] = p[1][l] - rho * c * lambda * oOSBar[l] * (SHalf[l] * v[0][l] - SHalf[l-1] * v[0][l-1]);
+    for (int l = 1; l < M; ++l) // calculate full range minus the boundaries
+        up[0][l] = up[1][l] - rho * c * lambda * oOSBar[l] * (SHalf[l] * uv[0][l] - SHalf[l-1] * uv[0][l-1]);
     
-    p[0][0] = p[1][0] - rho * c * lambda * oOSBar[0] * (-2.0 * (Ub + Ur) + 2.0 * SHalf[0] * v[0][0]);
+    // right (inner) boundary of left system
+    up[0][M] = up[1][M] - rho * c * lambda * oOSBar[M] * (SHalf[M] * uvNextMPh - SHalf[M-1] * uv[0][M-1]);
+    
+    for (int l = 1; l < Mw; ++l) // calculate full range minus the boundaries
+        wp[0][l] = wp[1][l] - rho * c * lambda * oOSBar[l+M] * (SHalf[l+M] * wv[0][l] - SHalf[l-1+M] * wv[0][l-1]);
+
+    // left (inner) boundary of right system
+    wp[0][0] = wp[1][0] - rho * c * lambda * oOSBar[M] * (SHalf[M] * wv[0][0] - SHalf[M-1] * wvNextmh);
+    
+    // excitation
+    up[0][0] = up[1][0] - rho * c * lambda * oOSBar[0] * (-2.0 * (Ub + Ur) + 2.0 * SHalf[0] * uv[0][0]);
+//    std::cout << up[0][M-1] - wp[0][0] << std::endl;
 }
 
 void Tube::calculateRadiation()
 {
-    p[0][N-1] = ((1.0 - rho * c * lambda * z3) * p[1][N-1] - 2.0 * rho * c * lambda * (v1 + z4 * p1 - (SHalf[N-2] * v[0][N-2]) * oOSBar[N-1])) * oORadTerm;
+    wp[0][Mw] = ((1.0 - rho * c * lambda * z3) * wp[1][Mw] - 2.0 * rho * c * lambda * (v1 + z4 * p1 - (SHalf[Nint-1] * wv[0][Mw-1]) * oOSBar[Nint])) * oORadTerm;
 
-    v1Next = v1 + k / (2.0 * Lr) * (p[0][N-1] + p[1][N-1]);
-    p1Next = z1 * 0.5 * (p[0][N-1] + p[1][N-1]) + z2 * p1;
-    
+    v1Next = v1 + k / (2.0 * Lr) * (wp[0][Mw] + wp[1][Mw]);
+    p1Next = z1 * 0.5 * (wp[0][Mw] + wp[1][Mw]) + z2 * p1;
+    if (v1Next != 0)
+        DBG("wait");
 }
 
 void Tube::updateStates()
 {
-    vTmp = v[1];
-    v[1] = v[0];
-    v[0] = vTmp;
+    uvTmp = uv[1];
+    uv[1] = uv[0];
+    uv[0] = uvTmp;
     
-    pTmp = p[1];
-    p[1] = p[0];
-    p[0] = pTmp;
+    wvTmp = wv[1];
+    wv[1] = wv[0];
+    wv[0] = wvTmp;
+    
+    upTmp = up[1];
+    up[1] = up[0];
+    up[0] = upTmp;
+    
+    wpTmp = wp[1];
+    wp[1] = wp[0];
+    wp[0] = wpTmp;
+    
+    uvMPh = uvNextMPh;
+    wvmh = wvNextmh;
     
     p1 = p1Next;
     v1 = v1Next;
 }
 
-void Tube::calculateGeometry (NamedValueSet& parameters)
+int Tube::calculateGeometry (std::vector<std::vector<double>>& geometry, NamedValueSet& parameters)
 {
-    S.resize (N, 0);
-    SHalf.resize (N-1, 0);
-    SBar.resize (N, 0);
-    oOSBar.resize (N, 0);
-    rLVec.resize (N, 0);
-    std::vector<double> lengths;
-    std::vector<double> lengthN;
-    std::vector<double> radii;
+    S.resize (Nint+1, 0);
+    SHalf.resize (Nint, 0);
+    SBar.resize (Nint+1, 0);
+    oOSBar.resize (Nint+1, 0);
     
-    radii.push_back (*parameters.getVarPointer ("inner1Rad")); // Rad first inner tube
-    radii.push_back (*parameters.getVarPointer ("slideRad"));  // Rad slide
-    radii.push_back (*parameters.getVarPointer ("inner2Rad")); // Rad second inner tube
-    radii.push_back (*parameters.getVarPointer ("gooseNeckRad")); // Rad gooseneck
-    radii.push_back (*parameters.getVarPointer ("tuningRad1")); // First rad tuning slide
-    radii.push_back (*parameters.getVarPointer ("tuningRad2")); // Second rad tuning slide
-    
-    lengths.push_back (*parameters.getVarPointer ("inner1L")); // Length first inner tube
-    lengths.push_back (*parameters.getVarPointer ("slideL"));  // Slide length (non-extended)
-    lengths.push_back (*parameters.getVarPointer ("inner2L")); // Length first inner tube
-    lengths.push_back (*parameters.getVarPointer ("gooseNeckL")); // Rad gooseneck
-    lengths.push_back (*parameters.getVarPointer ("tuningL")); // First rad tuning slide
-    lengths.push_back (*parameters.getVarPointer ("bellL")); // Second rad tuning slide
-    
-    double sumLengths = 0;
-    for (int i = 0; i < lengths.size(); ++i)
+    std::vector<double> lengthInN (geometry[0].size(), 0);
+    double totLength = 0;
+    int totLengthMinSlideInN = 0;
+
+    for (int i = 0; i < geometry[0].size(); ++i)
     {
-        sumLengths += lengths[i];
+        totLength += geometry[0][i];
     }
     
-//    for (int i = 0; i < radii.size(); ++i)
-//    {
-//        radii[i] = radii[i] * radii[i] * double_Pi; // convert to S
-//    }
-    
-    for (int i = 0; i < lengths.size(); ++i)
+    for (int i = 0; i < geometry[0].size(); ++i)
     {
-        lengthN.push_back (round ((NnonExtended * lengths[i]) / sumLengths));
+        lengthInN[i] = round(NnonExtended * geometry[0][i] / totLength);
+        if (i != 1)
+            totLengthMinSlideInN += lengthInN[i];
     }
     
-    lengthN[1] += (N - NnonExtended);
-    lengthN[5] += 1;
+    lengthInN[1] = Nint + 1 - totLengthMinSlideInN;
+    // indicate split of two connected schemes (including offset if N differs from NnonExtended
+    int addPointsAt = round(lengthInN[0] + lengthInN[2] * 0.5) + (Nint-NnonExtended) * 0.5;
+                                                                                                                            
+//    double mp = *parameters.getVarPointer ("mp");
+//    double tubeS = *parameters.getVarPointer ("tubeS");
+//
+//    int mpL = Nint * double (*parameters.getVarPointer ("mpL"));
+//    int m2tL = Nint * double (*parameters.getVarPointer ("m2tL"));
+//    int bellL = Nint * double (*parameters.getVarPointer ("bellL"));
     
     double flare = *parameters.getVarPointer ("flare");
     double x0 = *parameters.getVarPointer ("x0");
     double b = *parameters.getVarPointer ("b");
-    int idx = 0;
-    int j = 0;
-    while (j < lengths.size())
+
+    if (Global::setTubeTo1)
     {
-        for (int i = 0; i < lengthN[j]; ++i)
+        for (int i = 0; i <= Nint; ++i)
         {
-            if (j < 4)
-                rLVec[idx] = radii[j];
-            else if (j == 4)
-                rLVec[idx] = Global::linspace (radii[j], radii[j+1], lengthN[j], i);
-            else
-                rLVec[N - 1 - i] = b * pow((i / (lengthN[j]) * lengths[j] + x0), -flare);
-            
-            ++idx;
+            S[i] = 1;
         }
-        ++j;
     }
-
-    for (int i = 0; i < N; ++i)
-        S[i] = rLVec[i] * rLVec[i] * double_Pi;
+    else
+    {
+        int idx = 0;
+        int curN;
+        int lastNofPart = lengthInN[0];
+        for (int i = 0; i <= Nint; ++i)
+        {
+            if (i >= lastNofPart)
+            {
+                ++idx;
+                lastNofPart += lengthInN[idx];
+            }
+            if (idx == 4) // tuning slide
+            {
+                S[i] = pow(Global::linspace(geometry[1][idx], geometry[1][idx+1],
+                                        lengthInN[idx+1] -lengthInN[idx], i - curN - 1), 2) * double_Pi;
+            } else if (idx == 5)
+            {
+                double x = geometry[0][5] - geometry[0][5] * (i - (Nint - lengthInN[5]) - 1) / lengthInN[5];
+//                S[Nint-(i - (Nint - lengthInN[5]))] = pow(b * pow(((i - (Nint - lengthInN[5])) / (2.0 * lengthInN[5]) + x0), -flare), 2) * double_Pi;
+                S[i] = pow(b * pow(x + x0, -flare), 2) * double_Pi;
+            } else {
+                S[i] = pow(geometry[1][idx], 2) * double_Pi;
+                curN = i;
+            }
+        }
+//        for (int i = 0; i < Nint; ++i)
+//        {
+//            if (i < mpL)
+//                S[i] = mp;
+//            else if (i >= mpL && i < mpL + m2tL)
+//                S[i] = Global::linspace (mp, tubeS, m2tL, i-mpL);
+//            else if (i >= mpL + m2tL && i < Nint - bellL)
+//                S[i] = tubeS;
+//            else
+//                S[Nint-(i - (Nint - bellL))] = pow(b * pow(((i - (Nint - bellL)) / (2.0 * bellL) + x0), -flare), 2) * double_Pi;
+//        }
+    }
     
-    for (int i = 0; i < N - 1; ++i)
+    for (int i = 0; i < Nint; ++i)
         SHalf[i] = (S[i] + S[i+1]) * 0.5;
-
+    
     SBar[0] = S[0];
     
-    for (int i = 0; i < N - 2; ++i)
+    for (int i = 0; i < Nint - 1; ++i)
         SBar[i+1] = (SHalf[i] + SHalf[i+1]) * 0.5;
-
-    SBar[N-1] = S[N-1];
-    for (int i = 0; i < N; ++i)
+    
+    SBar[Nint] = S[Nint];
+    for (int i = 0; i <= Nint; ++i)
         oOSBar[i] = 1.0 / SBar[i];
+    
+    return addPointsAt;
 }
 
-//void Tube::calculateRadii()
-//{
-//    radii.resize (N, 0);
-//    for (int i = 0; i < N; ++i)
-//        radii[i] = sqrt (S[i]) / double_Pi;
-//  
-//}
-
+void Tube::calculateRadii()
+{
+    radii.resize (Nint, 0);
+    for (int i = 0; i < Nint; ++i)
+        radii[i] = sqrt (S[i]) / double_Pi;
+    
+}
 double Tube::getKinEnergy()
 {
     double kinEnergy = 0;
-    for (int i = 0; i < N-1; ++i)
-        kinEnergy += rho * 0.5 * h * (SHalf[i] * v[0][i] * v[1][i]);
-    
-    if (kinEnergy1 < 0)
+    for (int i = 0; i <= M; ++i)
+    {
+        kinEnergy += 1.0 / (2.0 * rho * c * c) * h * (SBar[i] * up[1][i] * up[1][i] * (i == 0 || i == M ? 0.5 : 1));
+    }
+    for (int i = 0; i <= Mw; ++i)
+    {
+        kinEnergy += 1.0 / (2.0 * rho * c * c) * h * (SBar[i + M] * wp[1][i] * wp[1][i] * (i == 0 || i == Mw ? 0.5 : 1));
+    }
+    if (kinEnergy1 <= 0)
         kinEnergy1 = kinEnergy;
-    
     return kinEnergy;
-}
 
+}
 
 double Tube::getPotEnergy()
 {
     double potEnergy = 0;
-    for (int i = 0; i < N; ++i)
-    {
-        potEnergy += 1.0 / (2.0 * rho * c * c) * h * (SBar[i] * p[1][i] * p[1][i] * (i == 0 || i == N-1 ? 0.5 : 1));
-    }
+    for (int i = 0; i < M; ++i)
+        potEnergy += rho * 0.5 * h * (SHalf[i] * uv[0][i] * uv[1][i]);
+    
+    for (int i = 0; i < Mw; ++i)
+        potEnergy += rho * 0.5 * h * (SHalf[i+M] * wv[0][i] * wv[1][i]);
+    
     if (potEnergy1 < 0)
         potEnergy1 = potEnergy;
+    
     return potEnergy;
-
 }
 
 double Tube::getRadEnergy()
 {
-    double radEnergy = SBar[N-1] / 2.0 * (Lr * v1 * v1 + Cr * p1 * p1);
+    double radEnergy = SBar[Nint] / 2.0 * (Lr * v1 * v1 + Cr * p1 * p1);
     
     if (radEnergy1 < 0)
         radEnergy1 = radEnergy;
@@ -376,10 +462,10 @@ double Tube::getRadEnergy()
 
 double Tube::getRadDampEnergy()
 {
-    double pBar = 0.5 * (p[0][N-1] + p[1][N-1]);
+    double pBar = 0.5 * (wp[0][Mw] + wp[1][Mw]);
     double muTPv2 = (pBar - 0.5 * (p1Next + p1)) / R1;
     
-    double qRad = SBar[N-1] * (R1 * muTPv2 * muTPv2 + R2 * (0.5 * ((p1Next + p1) / R2) * (0.5 * ((p1Next + p1) / R2))));
+    double qRad = SBar[Nint] * (R1 * muTPv2 * muTPv2 + R2 * (0.5 * ((p1Next + p1) / R2) * (0.5 * ((p1Next + p1) / R2))));
     double qHRad = k * qRad + qHRadPrev;
 
     double qHRadPrevTmp = qHRadPrev;

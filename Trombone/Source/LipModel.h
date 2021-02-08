@@ -53,10 +53,6 @@ public:
     void mouseDrag (const MouseEvent& e) override;
     void mouseUp (const MouseEvent& e) override;
     
-    void setDynamicParams (double PmIn, double f0In) { pressureVal = PmIn; lipFreqVal = f0In; refreshInputParams(); }
-    
-    double getLipFreq() { return lipFreqVal; };
-    
 private:
     double k, omega0, M, sig, Sr, w, Kcol, alpha, H0, b, eta, g, psi, psiPrev, Pm, Ub, Ur;
     double oOk, omega0Sq, kO2M, oOM, oOa1, oO2k;
