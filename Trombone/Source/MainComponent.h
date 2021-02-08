@@ -41,6 +41,7 @@ private:
     std::unique_ptr<Trombone> trombone;
     double fs;
     long t = 0;
+    bool done = false;
     std::vector<std::vector<double>> geometry;
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (MainComponent)
 };

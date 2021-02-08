@@ -35,7 +35,10 @@ LipModel::LipModel (NamedValueSet& parameters, double k) : k (k),
         yPrev = 0;
     }
     
-    pressureVal = Pm;
+    if (Global::exciteFromStart)
+        pressureVal = Pm;
+    else
+        pressureVal = 0;
     // In your constructor, you should add any child components, and
     // initialise any special settings that your component needs.
     oOk = 1.0 / k;
@@ -163,7 +166,9 @@ double LipModel::getDampEnergy()
     double qH = k * dampEnergy + qHPrev;
     double qHPrevTmp = qHPrev;
     qHPrev = qH;
+//    return qHPrevTmp == 0 ? qHPrev : qHPrevTmp;
     return qHPrevTmp;
+//    return qH;
 }
 
 double LipModel::getPower()
@@ -172,7 +177,9 @@ double LipModel::getPower()
     double pH = k * power + pHPrev;
     double pHPrevTmp = pHPrev;
     pHPrev = pH;
+//    return pHPrevTmp == 0 ? pHPrev : pHPrevTmp;
     return pHPrevTmp;
+//    return pH;
     
 }
 

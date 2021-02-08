@@ -10,7 +10,7 @@
             ignoreCount = "0"
             continueAfterRunningActions = "No"
             filePath = "../../Source/MainComponent.cpp"
-            timestampString = "621886775.535843"
+            timestampString = "634488955.558812"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
             startingLineNumber = "45"
@@ -26,12 +26,12 @@
             ignoreCount = "0"
             continueAfterRunningActions = "No"
             filePath = "../../Source/MainComponent.cpp"
-            timestampString = "621886775.5359941"
+            timestampString = "634488955.5593441"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
             startingLineNumber = "93"
             endingLineNumber = "93"
-            landmarkName = "MainComponent::prepareToPlay (int samplesPerBlockExpected, double sampleRate)"
+            landmarkName = "MainComponent::getNextAudioBlock (const AudioSourceChannelInfo&amp; bufferToFill)"
             landmarkType = "7">
          </BreakpointContent>
       </BreakpointProxy>
@@ -42,12 +42,12 @@
             ignoreCount = "0"
             continueAfterRunningActions = "No"
             filePath = "../../Source/Trombone.cpp"
-            timestampString = "621886775.536082"
+            timestampString = "634488955.559643"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
             startingLineNumber = "21"
             endingLineNumber = "21"
-            landmarkName = "Trombone::Trombone (NamedValueSet&amp; parameters, double k)"
+            landmarkName = "Trombone::Trombone (NamedValueSet&amp; parameters, double k, std::vector&lt;std::vector&lt;double&gt;&gt;&amp; geometry)"
             landmarkType = "7">
          </BreakpointContent>
       </BreakpointProxy>
@@ -58,12 +58,12 @@
             ignoreCount = "0"
             continueAfterRunningActions = "No"
             filePath = "../../Source/Trombone.cpp"
-            timestampString = "621886775.536137"
+            timestampString = "634488955.559726"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
             startingLineNumber = "23"
             endingLineNumber = "23"
-            landmarkName = "Trombone::Trombone (NamedValueSet&amp; parameters, double k)"
+            landmarkName = "Trombone::Trombone (NamedValueSet&amp; parameters, double k, std::vector&lt;std::vector&lt;double&gt;&gt;&amp; geometry)"
             landmarkType = "7">
          </BreakpointContent>
       </BreakpointProxy>
@@ -74,11 +74,11 @@
             ignoreCount = "0"
             continueAfterRunningActions = "No"
             filePath = "../../Source/Tube.cpp"
-            timestampString = "625759958.827418"
+            timestampString = "634488955.5598"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "293"
-            endingLineNumber = "293"
+            startingLineNumber = "291"
+            endingLineNumber = "291"
             landmarkName = "Tube::updateStates()"
             landmarkType = "7">
          </BreakpointContent>
@@ -90,7 +90,7 @@
             ignoreCount = "0"
             continueAfterRunningActions = "No"
             filePath = "../../Source/Tube.cpp"
-            timestampString = "625759958.827944"
+            timestampString = "634488955.5598609"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
             startingLineNumber = "61"
@@ -106,7 +106,7 @@
             ignoreCount = "0"
             continueAfterRunningActions = "No"
             filePath = "../../Source/Tube.cpp"
-            timestampString = "625759958.828338"
+            timestampString = "634488955.559914"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
             startingLineNumber = "254"
@@ -122,11 +122,11 @@
             ignoreCount = "0"
             continueAfterRunningActions = "No"
             filePath = "../../Source/Tube.cpp"
-            timestampString = "625759958.828884"
+            timestampString = "634488955.559967"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "296"
-            endingLineNumber = "296"
+            startingLineNumber = "294"
+            endingLineNumber = "294"
             landmarkName = "Tube::updateStates()"
             landmarkType = "7">
          </BreakpointContent>
@@ -138,11 +138,11 @@
             ignoreCount = "0"
             continueAfterRunningActions = "No"
             filePath = "../../Source/Tube.cpp"
-            timestampString = "625759958.829263"
+            timestampString = "634488955.5600179"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "297"
-            endingLineNumber = "297"
+            startingLineNumber = "295"
+            endingLineNumber = "295"
             landmarkName = "Tube::updateStates()"
             landmarkType = "7">
          </BreakpointContent>
@@ -154,12 +154,12 @@
             ignoreCount = "0"
             continueAfterRunningActions = "No"
             filePath = "../../Source/Trombone.cpp"
-            timestampString = "621886775.5386"
+            timestampString = "634488955.560071"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "60"
-            endingLineNumber = "60"
-            landmarkName = "Trombone::calculate()"
+            startingLineNumber = "61"
+            endingLineNumber = "61"
+            landmarkName = "Trombone::resized()"
             landmarkType = "7">
          </BreakpointContent>
       </BreakpointProxy>
@@ -170,7 +170,7 @@
             ignoreCount = "0"
             continueAfterRunningActions = "No"
             filePath = "../../Source/Tube.cpp"
-            timestampString = "625759958.829632"
+            timestampString = "634488955.560143"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
             startingLineNumber = "218"
@@ -186,12 +186,12 @@
             ignoreCount = "0"
             continueAfterRunningActions = "No"
             filePath = "../../Source/Trombone.cpp"
-            timestampString = "621886775.539205"
+            timestampString = "634488955.560223"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "61"
-            endingLineNumber = "61"
-            landmarkName = "Trombone::calculate()"
+            startingLineNumber = "62"
+            endingLineNumber = "62"
+            landmarkName = "Trombone::resized()"
             landmarkType = "7">
          </BreakpointContent>
       </BreakpointProxy>
@@ -202,11 +202,11 @@
             ignoreCount = "0"
             continueAfterRunningActions = "No"
             filePath = "../../Source/Trombone.cpp"
-            timestampString = "621886775.5392621"
+            timestampString = "634488955.56031"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "65"
-            endingLineNumber = "65"
+            startingLineNumber = "66"
+            endingLineNumber = "66"
             landmarkName = "Trombone::calculate()"
             landmarkType = "7">
          </BreakpointContent>
@@ -218,11 +218,11 @@
             ignoreCount = "0"
             continueAfterRunningActions = "No"
             filePath = "../../Source/LipModel.cpp"
-            timestampString = "621859911.888006"
+            timestampString = "634488955.560384"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "42"
-            endingLineNumber = "42"
+            startingLineNumber = "45"
+            endingLineNumber = "45"
             landmarkName = "LipModel::LipModel (NamedValueSet&amp; parameters, double k)"
             landmarkType = "7">
          </BreakpointContent>
@@ -234,11 +234,11 @@
             ignoreCount = "0"
             continueAfterRunningActions = "No"
             filePath = "../../Source/LipModel.cpp"
-            timestampString = "621859911.888061"
+            timestampString = "634488955.560459"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "102"
-            endingLineNumber = "102"
+            startingLineNumber = "105"
+            endingLineNumber = "105"
             landmarkName = "LipModel::calculateDeltaP()"
             landmarkType = "7">
          </BreakpointContent>
@@ -250,11 +250,11 @@
             ignoreCount = "0"
             continueAfterRunningActions = "No"
             filePath = "../../Source/LipModel.cpp"
-            timestampString = "621859911.888108"
+            timestampString = "634488955.560534"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "112"
-            endingLineNumber = "112"
+            startingLineNumber = "115"
+            endingLineNumber = "115"
             landmarkName = "LipModel::calculate()"
             landmarkType = "7">
          </BreakpointContent>
@@ -266,7 +266,7 @@
             ignoreCount = "0"
             continueAfterRunningActions = "No"
             filePath = "../../Source/Tube.cpp"
-            timestampString = "625759958.829969"
+            timestampString = "634488955.560599"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
             startingLineNumber = "240"
@@ -282,7 +282,7 @@
             ignoreCount = "0"
             continueAfterRunningActions = "No"
             filePath = "../../Source/Tube.cpp"
-            timestampString = "625759958.830227"
+            timestampString = "634488955.560656"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
             startingLineNumber = "52"
@@ -298,7 +298,7 @@
             ignoreCount = "0"
             continueAfterRunningActions = "No"
             filePath = "../../Source/Tube.cpp"
-            timestampString = "625759958.830511"
+            timestampString = "634488955.560712"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
             startingLineNumber = "53"
@@ -314,7 +314,7 @@
             ignoreCount = "0"
             continueAfterRunningActions = "No"
             filePath = "../../Source/Tube.cpp"
-            timestampString = "625759958.8308491"
+            timestampString = "634488955.560787"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
             startingLineNumber = "28"
@@ -330,27 +330,11 @@
             ignoreCount = "0"
             continueAfterRunningActions = "No"
             filePath = "../../Source/LipModel.cpp"
-            timestampString = "621859911.8892601"
+            timestampString = "634488955.560843"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "195"
-            endingLineNumber = "195"
-            landmarkName = "LipModel::mouseUp (const MouseEvent&amp; e)"
-            landmarkType = "7">
-         </BreakpointContent>
-      </BreakpointProxy>
-      <BreakpointProxy
-         BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
-         <BreakpointContent
-            shouldBeEnabled = "No"
-            ignoreCount = "0"
-            continueAfterRunningActions = "No"
-            filePath = "../../Source/LipModel.cpp"
-            timestampString = "621859911.889307"
-            startingColumnNumber = "9223372036854775807"
-            endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "189"
-            endingLineNumber = "189"
+            startingLineNumber = "202"
+            endingLineNumber = "202"
             landmarkName = "LipModel::mouseDrag (const MouseEvent&amp; e)"
             landmarkType = "7">
          </BreakpointContent>
@@ -362,12 +346,12 @@
             ignoreCount = "0"
             continueAfterRunningActions = "No"
             filePath = "../../Source/LipModel.cpp"
-            timestampString = "621859911.8893501"
+            timestampString = "634488955.560908"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
             startingLineNumber = "196"
             endingLineNumber = "196"
-            landmarkName = "LipModel::mouseUp (const MouseEvent&amp; e)"
+            landmarkName = "LipModel::mouseDown (const MouseEvent&amp; e)"
             landmarkType = "7">
          </BreakpointContent>
       </BreakpointProxy>
@@ -378,12 +362,12 @@
             ignoreCount = "0"
             continueAfterRunningActions = "No"
             filePath = "../../Source/LipModel.cpp"
-            timestampString = "621859911.8893909"
+            timestampString = "634488955.560973"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "175"
-            endingLineNumber = "175"
-            landmarkName = "LipModel::refreshInputParams()"
+            startingLineNumber = "203"
+            endingLineNumber = "203"
+            landmarkName = "LipModel::mouseDrag (const MouseEvent&amp; e)"
             landmarkType = "7">
          </BreakpointContent>
       </BreakpointProxy>
@@ -394,11 +378,11 @@
             ignoreCount = "0"
             continueAfterRunningActions = "No"
             filePath = "../../Source/LipModel.cpp"
-            timestampString = "621859911.88943"
+            timestampString = "634488955.5610369"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "100"
-            endingLineNumber = "100"
+            startingLineNumber = "103"
+            endingLineNumber = "103"
             landmarkName = "LipModel::calculateDeltaP()"
             landmarkType = "7">
          </BreakpointContent>
@@ -410,11 +394,11 @@
             ignoreCount = "0"
             continueAfterRunningActions = "No"
             filePath = "../../Source/LipModel.cpp"
-            timestampString = "621859911.889474"
+            timestampString = "634488955.5611"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "45"
-            endingLineNumber = "45"
+            startingLineNumber = "48"
+            endingLineNumber = "48"
             landmarkName = "LipModel::LipModel (NamedValueSet&amp; parameters, double k)"
             landmarkType = "7">
          </BreakpointContent>
@@ -426,13 +410,13 @@
             ignoreCount = "0"
             continueAfterRunningActions = "No"
             filePath = "../../Source/MainComponent.cpp"
-            timestampString = "621886775.5412149"
+            timestampString = "634488955.5611629"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "125"
-            endingLineNumber = "125"
-            landmarkName = "MainComponent::getNextAudioBlock (const AudioSourceChannelInfo&amp; bufferToFill)"
-            landmarkType = "7">
+            startingLineNumber = "128"
+            endingLineNumber = "128"
+            landmarkName = "unknown"
+            landmarkType = "0">
          </BreakpointContent>
       </BreakpointProxy>
       <BreakpointProxy
@@ -442,13 +426,13 @@
             ignoreCount = "0"
             continueAfterRunningActions = "No"
             filePath = "../../Source/MainComponent.cpp"
-            timestampString = "621886775.541284"
+            timestampString = "634488955.561556"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "124"
-            endingLineNumber = "124"
-            landmarkName = "MainComponent::getNextAudioBlock (const AudioSourceChannelInfo&amp; bufferToFill)"
-            landmarkType = "7">
+            startingLineNumber = "127"
+            endingLineNumber = "127"
+            landmarkName = "unknown"
+            landmarkType = "0">
          </BreakpointContent>
       </BreakpointProxy>
       <BreakpointProxy
@@ -458,7 +442,7 @@
             ignoreCount = "0"
             continueAfterRunningActions = "No"
             filePath = "../../Source/Tube.cpp"
-            timestampString = "625759958.831339"
+            timestampString = "634488955.561996"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
             startingLineNumber = "29"
@@ -474,7 +458,7 @@
             ignoreCount = "0"
             continueAfterRunningActions = "No"
             filePath = "../../Source/Tube.cpp"
-            timestampString = "625759958.831823"
+            timestampString = "634488955.562111"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
             startingLineNumber = "65"
@@ -490,7 +474,7 @@
             ignoreCount = "0"
             continueAfterRunningActions = "No"
             filePath = "../../Source/Tube.cpp"
-            timestampString = "625759958.832267"
+            timestampString = "634488955.5622081"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
             startingLineNumber = "66"
@@ -506,7 +490,7 @@
             ignoreCount = "0"
             continueAfterRunningActions = "No"
             filePath = "../../Source/MainComponent.cpp"
-            timestampString = "621886775.542668"
+            timestampString = "634488955.562307"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
             startingLineNumber = "49"
@@ -522,7 +506,7 @@
             ignoreCount = "0"
             continueAfterRunningActions = "No"
             filePath = "../../Source/MainComponent.cpp"
-            timestampString = "621886775.542738"
+            timestampString = "634488955.562799"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
             startingLineNumber = "44"
@@ -538,12 +522,12 @@
             ignoreCount = "0"
             continueAfterRunningActions = "No"
             filePath = "../../Source/MainComponent.cpp"
-            timestampString = "621886775.542812"
+            timestampString = "634488955.563303"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
             startingLineNumber = "98"
             endingLineNumber = "98"
-            landmarkName = "MainComponent::prepareToPlay (int samplesPerBlockExpected, double sampleRate)"
+            landmarkName = "MainComponent::getNextAudioBlock (const AudioSourceChannelInfo&amp; bufferToFill)"
             landmarkType = "7">
          </BreakpointContent>
       </BreakpointProxy>
@@ -554,13 +538,11 @@
             ignoreCount = "0"
             continueAfterRunningActions = "No"
             filePath = "../../Source/MainComponent.cpp"
-            timestampString = "621886775.542872"
+            timestampString = "634488955.563674"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "165"
-            endingLineNumber = "165"
-            landmarkName = "MainComponent::hiResTimerCallback()"
-            landmarkType = "7">
+            startingLineNumber = "149"
+            endingLineNumber = "149">
          </BreakpointContent>
       </BreakpointProxy>
       <BreakpointProxy
@@ -570,7 +552,7 @@
             ignoreCount = "0"
             continueAfterRunningActions = "No"
             filePath = "../../Source/MainComponent.cpp"
-            timestampString = "621886775.542938"
+            timestampString = "634488955.564092"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
             startingLineNumber = "20"
@@ -618,11 +600,11 @@
             ignoreCount = "0"
             continueAfterRunningActions = "No"
             filePath = "../../Source/Tube.cpp"
-            timestampString = "625759958.833002"
+            timestampString = "634488955.56451"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "298"
-            endingLineNumber = "298"
+            startingLineNumber = "296"
+            endingLineNumber = "296"
             landmarkName = "Tube::updateStates()"
             landmarkType = "7">
          </BreakpointContent>
@@ -634,11 +616,11 @@
             ignoreCount = "0"
             continueAfterRunningActions = "No"
             filePath = "../../Source/Tube.cpp"
-            timestampString = "625759958.833974"
+            timestampString = "634488955.564574"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "310"
-            endingLineNumber = "310"
+            startingLineNumber = "308"
+            endingLineNumber = "308"
             landmarkName = "Tube::updateStates()"
             landmarkType = "7">
          </BreakpointContent>
@@ -650,11 +632,11 @@
             ignoreCount = "0"
             continueAfterRunningActions = "No"
             filePath = "../../Source/Tube.cpp"
-            timestampString = "625759958.834594"
+            timestampString = "634488955.564629"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "328"
-            endingLineNumber = "328"
+            startingLineNumber = "326"
+            endingLineNumber = "326"
             landmarkName = "Tube::calculateGeometry (std::vector&lt;std::vector&lt;double&gt;&gt;&amp; geometry, NamedValueSet&amp; parameters)"
             landmarkType = "7">
          </BreakpointContent>
@@ -666,11 +648,11 @@
             ignoreCount = "0"
             continueAfterRunningActions = "No"
             filePath = "../../Source/Tube.cpp"
-            timestampString = "625759958.835122"
+            timestampString = "634488955.564684"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "314"
-            endingLineNumber = "314"
+            startingLineNumber = "312"
+            endingLineNumber = "312"
             landmarkName = "unknown"
             landmarkType = "0">
          </BreakpointContent>
@@ -682,11 +664,11 @@
             ignoreCount = "0"
             continueAfterRunningActions = "No"
             filePath = "../../Source/Global.h"
-            timestampString = "621886775.544557"
+            timestampString = "634488955.564759"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "35"
-            endingLineNumber = "35"
+            startingLineNumber = "36"
+            endingLineNumber = "36"
             landmarkName = "linspace (double start, double finish, int N, int idx)"
             landmarkType = "9">
          </BreakpointContent>
@@ -698,11 +680,11 @@
             ignoreCount = "0"
             continueAfterRunningActions = "No"
             filePath = "../../Source/Tube.cpp"
-            timestampString = "625759958.835991"
+            timestampString = "634488955.564839"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "320"
-            endingLineNumber = "320"
+            startingLineNumber = "318"
+            endingLineNumber = "318"
             landmarkName = "Tube::calculateGeometry (std::vector&lt;std::vector&lt;double&gt;&gt;&amp; geometry, NamedValueSet&amp; parameters)"
             landmarkType = "7">
          </BreakpointContent>
@@ -714,7 +696,7 @@
             ignoreCount = "0"
             continueAfterRunningActions = "No"
             filePath = "../../Source/Tube.cpp"
-            timestampString = "625759958.836453"
+            timestampString = "634488955.564925"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
             startingLineNumber = "148"
@@ -730,7 +712,7 @@
             ignoreCount = "0"
             continueAfterRunningActions = "No"
             filePath = "../../Source/Tube.cpp"
-            timestampString = "625759958.8369859"
+            timestampString = "634488955.56501"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
             startingLineNumber = "144"
@@ -746,12 +728,188 @@
             ignoreCount = "0"
             continueAfterRunningActions = "No"
             filePath = "../../Source/Tube.cpp"
-            timestampString = "625759958.837458"
+            timestampString = "634488955.565093"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
             startingLineNumber = "145"
             endingLineNumber = "145"
             landmarkName = "Tube::paint (juce::Graphics&amp; g)"
+            landmarkType = "7">
+         </BreakpointContent>
+      </BreakpointProxy>
+      <BreakpointProxy
+         BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
+         <BreakpointContent
+            shouldBeEnabled = "No"
+            ignoreCount = "0"
+            continueAfterRunningActions = "No"
+            filePath = "../../Source/Trombone.cpp"
+            timestampString = "634488955.5651799"
+            startingColumnNumber = "9223372036854775807"
+            endingColumnNumber = "9223372036854775807"
+            startingLineNumber = "102"
+            endingLineNumber = "102"
+            landmarkName = "Trombone::calculateEnergy()"
+            landmarkType = "7">
+         </BreakpointContent>
+      </BreakpointProxy>
+      <BreakpointProxy
+         BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
+         <BreakpointContent
+            shouldBeEnabled = "No"
+            ignoreCount = "0"
+            continueAfterRunningActions = "No"
+            filePath = "../../Source/LipModel.cpp"
+            timestampString = "634488955.565289"
+            startingColumnNumber = "9223372036854775807"
+            endingColumnNumber = "9223372036854775807"
+            startingLineNumber = "160"
+            endingLineNumber = "160"
+            landmarkName = "LipModel::getCollisionEnergy()"
+            landmarkType = "7">
+         </BreakpointContent>
+      </BreakpointProxy>
+      <BreakpointProxy
+         BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
+         <BreakpointContent
+            shouldBeEnabled = "No"
+            ignoreCount = "0"
+            continueAfterRunningActions = "No"
+            filePath = "../../Source/LipModel.cpp"
+            timestampString = "634488955.5653909"
+            startingColumnNumber = "9223372036854775807"
+            endingColumnNumber = "9223372036854775807"
+            startingLineNumber = "150"
+            endingLineNumber = "150"
+            landmarkName = "LipModel::getLipEnergy()"
+            landmarkType = "7">
+         </BreakpointContent>
+      </BreakpointProxy>
+      <BreakpointProxy
+         BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
+         <BreakpointContent
+            shouldBeEnabled = "No"
+            ignoreCount = "0"
+            continueAfterRunningActions = "No"
+            filePath = "../../Source/Tube.cpp"
+            timestampString = "634488955.565488"
+            startingColumnNumber = "9223372036854775807"
+            endingColumnNumber = "9223372036854775807"
+            startingLineNumber = "62"
+            endingLineNumber = "62"
+            landmarkName = "Tube::Tube (NamedValueSet&amp; parameters, double k, std::vector&lt;std::vector&lt;double&gt;&gt;&amp; geometry)"
+            landmarkType = "7">
+         </BreakpointContent>
+      </BreakpointProxy>
+      <BreakpointProxy
+         BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
+         <BreakpointContent
+            shouldBeEnabled = "No"
+            ignoreCount = "0"
+            continueAfterRunningActions = "No"
+            filePath = "../../Source/LipModel.cpp"
+            timestampString = "634488955.565572"
+            startingColumnNumber = "9223372036854775807"
+            endingColumnNumber = "9223372036854775807"
+            startingLineNumber = "112"
+            endingLineNumber = "112"
+            landmarkName = "LipModel::calculateDeltaP()"
+            landmarkType = "7">
+         </BreakpointContent>
+      </BreakpointProxy>
+      <BreakpointProxy
+         BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
+         <BreakpointContent
+            shouldBeEnabled = "No"
+            ignoreCount = "0"
+            continueAfterRunningActions = "No"
+            filePath = "../../Source/LipModel.cpp"
+            timestampString = "634488955.5656641"
+            startingColumnNumber = "9223372036854775807"
+            endingColumnNumber = "9223372036854775807"
+            startingLineNumber = "126"
+            endingLineNumber = "126"
+            landmarkName = "LipModel::calculate()"
+            landmarkType = "7">
+         </BreakpointContent>
+      </BreakpointProxy>
+      <BreakpointProxy
+         BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
+         <BreakpointContent
+            shouldBeEnabled = "No"
+            ignoreCount = "0"
+            continueAfterRunningActions = "No"
+            filePath = "../../Source/LipModel.cpp"
+            timestampString = "634488955.565756"
+            startingColumnNumber = "9223372036854775807"
+            endingColumnNumber = "9223372036854775807"
+            startingLineNumber = "132"
+            endingLineNumber = "132"
+            landmarkName = "LipModel::calculate()"
+            landmarkType = "7">
+         </BreakpointContent>
+      </BreakpointProxy>
+      <BreakpointProxy
+         BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
+         <BreakpointContent
+            shouldBeEnabled = "No"
+            ignoreCount = "0"
+            continueAfterRunningActions = "No"
+            filePath = "../../Source/LipModel.cpp"
+            timestampString = "634488955.565847"
+            startingColumnNumber = "9223372036854775807"
+            endingColumnNumber = "9223372036854775807"
+            startingLineNumber = "133"
+            endingLineNumber = "133"
+            landmarkName = "LipModel::calculate()"
+            landmarkType = "7">
+         </BreakpointContent>
+      </BreakpointProxy>
+      <BreakpointProxy
+         BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
+         <BreakpointContent
+            shouldBeEnabled = "No"
+            ignoreCount = "0"
+            continueAfterRunningActions = "No"
+            filePath = "../../Source/Trombone.cpp"
+            timestampString = "634488955.565937"
+            startingColumnNumber = "9223372036854775807"
+            endingColumnNumber = "9223372036854775807"
+            startingLineNumber = "104"
+            endingLineNumber = "104"
+            landmarkName = "Trombone::calculateEnergy()"
+            landmarkType = "7">
+         </BreakpointContent>
+      </BreakpointProxy>
+      <BreakpointProxy
+         BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
+         <BreakpointContent
+            shouldBeEnabled = "No"
+            ignoreCount = "0"
+            continueAfterRunningActions = "No"
+            filePath = "../../Source/Trombone.cpp"
+            timestampString = "634488955.56603"
+            startingColumnNumber = "9223372036854775807"
+            endingColumnNumber = "9223372036854775807"
+            startingLineNumber = "83"
+            endingLineNumber = "83"
+            landmarkName = "Trombone::calculateEnergy()"
+            landmarkType = "7">
+         </BreakpointContent>
+      </BreakpointProxy>
+      <BreakpointProxy
+         BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
+         <BreakpointContent
+            shouldBeEnabled = "No"
+            ignoreCount = "0"
+            continueAfterRunningActions = "No"
+            filePath = "../../Source/Trombone.cpp"
+            timestampString = "634488955.566116"
+            startingColumnNumber = "9223372036854775807"
+            endingColumnNumber = "9223372036854775807"
+            startingLineNumber = "103"
+            endingLineNumber = "103"
+            landmarkName = "Trombone::calculateEnergy()"
             landmarkType = "7">
          </BreakpointContent>
       </BreakpointProxy>

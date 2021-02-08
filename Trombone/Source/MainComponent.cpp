@@ -61,14 +61,14 @@ void MainComponent::prepareToPlay (int samplesPerBlockExpected, double sampleRat
     parameters.set("Mr", 5.37e-5);                  // mass lips
     parameters.set("omega0", 2.0 * double_Pi * f0); // angular freq
     
-    parameters.set("sigmaR", 5);                    // damping
-    parameters.set("H0", H0);                   // equilibrium
-    parameters.set("barrier", -H0);                   // equilibrium
+    parameters.set("sigmaR", 0);                    // damping
+    parameters.set("H0", H0);                       // equilibrium
+    parameters.set("barrier", -H0);                 // equilibrium
 
     parameters.set("w", 1e-2);                      // lip width
     parameters.set("Sr", 1.46e-5);                  // lip area
     
-    parameters.set ("Kcol", 10000);
+    parameters.set ("Kcol", 100);
     parameters.set ("alphaCol", 3);
     
     //// Input ////
@@ -100,14 +100,17 @@ void MainComponent::getNextAudioBlock (const AudioSourceChannelInfo& bufferToFil
     {
         trombone->calculate();
         output = trombone->getOutput() * 0.001 * Global::oOPressureMultiplier;
-        trombone->saveToFiles();
+        if (!done)
+            trombone->saveToFiles();
+        
         trombone->updateStates();
-//        channelData1[i] = Global::outputClamp (output);
-//        channelData2[i] = Global::outputClamp (output);
+        channelData1[i] = Global::outputClamp (output);
+        channelData2[i] = Global::outputClamp (output);
         ++t;
     }
-    if (t > 1000)
+    if (t > 1000 && !done)
     {
+        done = true;
         trombone->closeFiles();
         std::cout << "done" << std::endl;
     }

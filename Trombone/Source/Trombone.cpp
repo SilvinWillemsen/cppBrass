@@ -34,6 +34,7 @@ Pm (*parameters.getVarPointer ("Pm"))
     MSave.open ("MSave.csv");
     MwSave.open ("MwSave.csv");
     energySave.open ("energySave.csv");
+    scaledTotEnergySave.open ("scaledTotEnergySave.csv");
 
 }
 
@@ -78,12 +79,28 @@ void Trombone::calculate()
 
 void Trombone::calculateEnergy()
 {
-    bool excludeLip = true;
-    double totEnergy = tube->getKinEnergy() + tube->getPotEnergy() + tube->getRadEnergy() + (excludeLip ? 0 : (lipModel->getLipEnergy() + lipModel->getCollisionEnergy()));
+    bool excludeLip = !Global::connectedToLip;
+    double kinEnergy = tube->getKinEnergy();
+    double potEnergy = tube->getPotEnergy();
+    double radEnergy = tube->getRadEnergy();
+    double lipEnergy = lipModel->getLipEnergy();
+    double lipCollisionEnergy = lipModel->getCollisionEnergy();
+    double totEnergy = kinEnergy + potEnergy + radEnergy + (excludeLip ? 0 : (lipEnergy + lipCollisionEnergy));
     double energy1 = tube->getKinEnergy1() + tube->getPotEnergy1() + tube->getRadEnergy1() + (excludeLip ? 0 : (lipModel->getLipEnergy1() + lipModel->getCollisionEnergy1()));
     
-    scaledTotEnergy = (totEnergy + lipModel->getPower() + lipModel->getDampEnergy() + tube->getRadDampEnergy() - energy1) / energy1;
-//    std::cout << scaledTotEnergy << std::endl;
+    energySave << kinEnergy << ", ";
+    energySave << potEnergy << ", ";
+    energySave << radEnergy << ", ";
+    energySave << lipEnergy << ", ";
+    energySave << lipCollisionEnergy << ", ";
+    energySave << lipModel->getPower() << ", ";
+    energySave << lipModel->getDampEnergy() << ", ";
+    energySave << tube->getRadDampEnergy() << ", ";
+    energySave << energy1 << ";\n";
+
+    
+    scaledTotEnergy = (totEnergy + lipModel->getPower() + lipModel->getDampEnergy() + tube->getRadDampEnergy() - energy1) / pow(2, floor (log2 (energy1)));
+    scaledTotEnergySave << scaledTotEnergy << ";\n";
 }
 
 void Trombone::updateStates()
@@ -107,8 +124,6 @@ void Trombone::saveToFiles()
     
     MSave << tube->getM() << ";\n";
     MwSave << tube->getMw() << ";\n";
-    
-    energySave << scaledTotEnergy << ";\n";
 }
 
 void Trombone::closeFiles()
@@ -119,5 +134,6 @@ void Trombone::closeFiles()
     MSave.close();
     MwSave.close();
     energySave.close();
+    scaledTotEnergySave.close();
 
 }

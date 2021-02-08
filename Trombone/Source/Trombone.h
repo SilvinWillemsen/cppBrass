@@ -47,6 +47,6 @@ private:
     
     double scaledTotEnergy = 0;
     
-    std::ofstream massState, pState, vState, MSave, MwSave, energySave;
+    std::ofstream massState, pState, vState, MSave, MwSave, energySave, scaledTotEnergySave;
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (Trombone)
 };

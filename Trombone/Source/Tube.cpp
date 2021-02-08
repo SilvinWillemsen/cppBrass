@@ -62,7 +62,7 @@ Tube::Tube (NamedValueSet& parameters, double k, std::vector<std::vector<double>
         int start = 20;
         int end = 30;
         
-        double scaling = 1.0;
+        double scaling = 1000.0;
         for (int n = 0; n < 2; ++n)
         {
             for (int l = start; l < end; ++l)
@@ -196,7 +196,7 @@ Path Tube::visualiseState (Graphics& g, double visualScaling)
                 x -= spacing;
                 switchToW = true;
             }
-            newY = -wp[1][y-M] * visualScaling + stringBounds; // Needs to be -p, because a positive p would visually go down
+            newY = -wp[1][y-M-1] * visualScaling + stringBounds; // Needs to be -p, because a positive p would visually go down
 //            if (y == M)
 //            {
 //                std::cout << ", " << x << std::endl;;
@@ -283,8 +283,6 @@ void Tube::calculateRadiation()
 
     v1Next = v1 + k / (2.0 * Lr) * (wp[0][Mw] + wp[1][Mw]);
     p1Next = z1 * 0.5 * (wp[0][Mw] + wp[1][Mw]) + z2 * p1;
-    if (v1Next != 0)
-        DBG("wait");
 }
 
 void Tube::updateStates()
