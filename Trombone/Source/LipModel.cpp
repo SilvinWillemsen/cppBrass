@@ -70,8 +70,7 @@ void LipModel::paint (juce::Graphics& g)
        drawing code..
     */
 
-    g.fillAll (Colours::yellow);   // clear the background;
-    g.drawText("Pressure: " + String(pressureVal) + "(Pa) LipFrequency: " + String (lipFreqVal) + "(Hz)", getWidth() - 300, getHeight() - 50, 300, 50, Justification::centredRight);
+//    g.fillAll (Colours::yellow);   // clear the background;
     
 }
 
@@ -191,23 +190,3 @@ void LipModel::refreshInputParams()
     omega0Sq = omega0 * omega0;
     a1Coeff = 2.0 * oOk + omega0Sq * k + sig;
 }
-
-
-void LipModel::mouseDown (const MouseEvent& e)
-{
-    pressureVal = e.y * Global::pressureMultiplier;
-    lipFreqVal = e.x;
-    
-}
-
-void LipModel::mouseDrag (const MouseEvent& e)
-{
-    pressureVal = e.y * Global::pressureMultiplier;
-    lipFreqVal = e.x;
-}
-
-void LipModel::mouseUp (const MouseEvent& e)
-{
-    pressureVal = 0;
-}
-

@@ -57,14 +57,16 @@ void Trombone::resized()
 {
     // This method is where you should set the bounds of any child
     // components that your component contains..
-    Rectangle<int> totArea = getLocalBounds();
-    tube->setBounds (totArea.removeFromTop (getHeight() * 0.5));
-    lipModel->setBounds (totArea);
+//    Rectangle<int> totArea = getLocalBounds();
+//    tube->setBounds (totArea.removeFromTop(getHeight));
+//    lipModel->setBounds (totArea);
+    tube->setBounds (getLocalBounds());
 
 }
 
 void Trombone::calculate()
 {
+    tube->updateL();
     tube->calculateVelocity();
     lipModel->setTubeStates (tube->getP (1, 0), tube->getV (0, 0));
     lipModel->calculateCollision();
@@ -73,13 +75,13 @@ void Trombone::calculate()
     tube->setFlowVelocities (lipModel->getUb(), lipModel->getUr());
     tube->calculatePressure();
     tube->calculateRadiation();
-    
+
 //#if DEBUG == 1
 //    calculateEnergy();
 //#endif
 }
 
-void Trombone::calculateEnergy() 
+void Trombone::calculateEnergy()
 {
     bool excludeLip = !Global::connectedToLip;
 //    bool excludeLip = false;
@@ -121,10 +123,10 @@ void Trombone::saveToFiles()
 {
     massState << getLipOutput() << ";\n";
     
-    for (int l = 0; l <= tube->getNint() + 1; ++l)
+    for (int l = 0; l <= tube->getMaxN() + 1; ++l)
     {
         pState << tube->getP (1, l) << ", ";
-        if (l < tube->getNint())
+        if (l < tube->getMaxN())
             vState << tube->getV (1, l) << ", ";
     }
     pState << ";\n";

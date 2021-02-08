@@ -39,6 +39,10 @@ public:
 
     void refreshLipModelInputParams() { lipModel->refreshInputParams(); };
     
+    void setExtVals (double pVal, double lFVal, double LVal) {
+        lipModel->setExtVals (pVal, lFVal);
+        tube->setExtVals (LVal);
+    };
 private:
     std::unique_ptr<Tube> tube;
     std::unique_ptr<LipModel> lipModel;

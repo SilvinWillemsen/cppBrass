@@ -12,23 +12,32 @@
 #include "Tube.h"
 
 //==============================================================================
-Tube::Tube (NamedValueSet& parameters, double k, std::vector<std::vector<double>>& geometry) : k (k), L (*parameters.getVarPointer("L")), T (*parameters.getVarPointer("T"))
+Tube::Tube (NamedValueSet& parameters, double k, std::vector<std::vector<double>>& geometry) : k (k), L (*parameters.getVarPointer("L")), T (*parameters.getVarPointer("T")), geometry (geometry)
 {
     calculateThermodynamicConstants();
     
     h = c * k;
-    NnonExtended = floor (static_cast<double>(*parameters.getVarPointer("LnonExtended")) / h);
-    
+    double LnonExtended = static_cast<double>(*parameters.getVarPointer("LnonExtended"));
+    NnonExtended = floor (LnonExtended / h);
+    Nextended = floor (static_cast<double>(*parameters.getVarPointer("Lextended")) / h);
     N = L / h;
     if (Global::dontInterpolateAtStart)
     {
         L = floor(N) * h;
         N = L / h;
     }
-    Nint = floor(N);
+    LtoGoTo = L;
+
+    Nint = floor (N);
+    NintPrev = Nint;
 //    h = L / Nint;
     
-    M = calculateGeometry (geometry, parameters);
+    flare = *parameters.getVarPointer ("flare");
+    x0 = *parameters.getVarPointer ("x0");
+    b = *parameters.getVarPointer ("b");
+
+    M = round(geometry[0][0] + geometry[0][1] * 0.5) * NnonExtended / LnonExtended + (Nint-NnonExtended) * 0.5;
+    calculateGeometry();
     Mw = Nint-M;
 
     calculateRadii();
@@ -45,17 +54,19 @@ Tube::Tube (NamedValueSet& parameters, double k, std::vector<std::vector<double>
 
 //    M = ceil (N*0.5);
 //    Mw = floor (N*0.5);
+    maxM = M + ceil((Nextended - NnonExtended) * 0.5); // check whether this is correct
+    maxMw = Nextended - maxM;
     for (int i = 0; i < 2; ++i)
     {
         // need to change to proper sizes
-        uvVecs[i] = std::vector<double> (M, 0);
-        upVecs[i] = std::vector<double> (M+1, 0);
-        wvVecs[i] = std::vector<double> (Mw, 0);
-        wpVecs[i] = std::vector<double> (Mw+1, 0);
+        uvVecs[i] = std::vector<double> (maxM, 0);
+        upVecs[i] = std::vector<double> (maxM+1, 0);
+        wvVecs[i] = std::vector<double> (maxMw, 0);
+        wpVecs[i] = std::vector<double> (maxMw+1, 0);
 
     }
     
-    if (raisedCos || !Global::connectedToLip)
+    if (raisedCos)// || !Global::connectedToLip)
     {
         //        int start = N * 0.25 - 5;
         //        int end = N * 0.25 + 5;
@@ -115,6 +126,10 @@ Tube::Tube (NamedValueSet& parameters, double k, std::vector<std::vector<double>
     
     p1 = 0;
     v1 = 0;
+    
+    quadIp.resize (3, 0);
+    customIp.resize (4, 0);
+
 }
 
 Tube::~Tube()
@@ -129,6 +144,7 @@ void Tube::paint (juce::Graphics& g)
        You should replace everything in this method with your own
        drawing code..
     */
+    g.fillAll (getLookAndFeel().findColour (ResizableWindow::backgroundColourId));
 
 //    if (init)
 //    {
@@ -150,7 +166,7 @@ void Tube::paint (juce::Graphics& g)
 
 Path Tube::drawGeometry (Graphics& g, int topOrBottom)
 {
-    double visualScaling = 1000.0;
+    double visualScaling = 10.0 * getHeight();
     Path stringPath;
     stringPath.startNewSubPath (0, topOrBottom * radii[0] * visualScaling + getHeight() * 0.5);
     int stateWidth = getWidth();
@@ -243,8 +259,6 @@ void Tube::calculateVelocity()
     for (int l = 0; l < Mw; ++l)
         wv[0][l] = wv[1][l] - lambdaOverRhoC * (wp[1][l+1] - wp[1][l]);
     
-    double alf = N - Nint;
-    std::vector<double> quadIp (3, 0);
     quadIp[0] = -(alf - 1) / (alf + 1);
     quadIp[1] = 1;
     quadIp[2] = (alf - 1) / (alf + 1);
@@ -310,7 +324,7 @@ void Tube::updateStates()
     v1 = v1Next;
 }
 
-int Tube::calculateGeometry (std::vector<std::vector<double>>& geometry, NamedValueSet& parameters)
+void Tube::calculateGeometry()
 {
     S.resize (Nint+1, 0);
     SHalf.resize (Nint, 0);
@@ -335,8 +349,6 @@ int Tube::calculateGeometry (std::vector<std::vector<double>>& geometry, NamedVa
     
     lengthInN[1] = Nint + 1 - totLengthMinSlideInN;
     // indicate split of two connected schemes (including offset if N differs from NnonExtended
-    int addPointsAt = round(lengthInN[0] + lengthInN[2] * 0.5) + (Nint-NnonExtended) * 0.5;
-                                                                                                                            
 //    double mp = *parameters.getVarPointer ("mp");
 //    double tubeS = *parameters.getVarPointer ("tubeS");
 //
@@ -344,10 +356,6 @@ int Tube::calculateGeometry (std::vector<std::vector<double>>& geometry, NamedVa
 //    int m2tL = Nint * double (*parameters.getVarPointer ("m2tL"));
 //    int bellL = Nint * double (*parameters.getVarPointer ("bellL"));
     
-    double flare = *parameters.getVarPointer ("flare");
-    double x0 = *parameters.getVarPointer ("x0");
-    double b = *parameters.getVarPointer ("b");
-
     if (Global::setTubeTo1)
     {
         for (int i = 0; i <= Nint; ++i)
@@ -405,8 +413,6 @@ int Tube::calculateGeometry (std::vector<std::vector<double>>& geometry, NamedVa
     SBar[Nint] = S[Nint];
     for (int i = 0; i <= Nint; ++i)
         oOSBar[i] = 1.0 / SBar[i];
-    
-    return addPointsAt;
 }
 
 void Tube::calculateRadii()
@@ -471,4 +477,127 @@ double Tube::getRadDampEnergy()
     return qHRadPrevTmp;
                                                             
 
+}
+
+void Tube::updateL()
+{
+    Lprev = L;
+    NintPrev = Nint;
+    
+    L = 0.000005 * LtoGoTo + 0.999995 * Lprev;
+    N = L / h;
+    Nint = floor(N);
+    alf = N - Nint;
+    if (Nint != NintPrev)
+    {
+        addRemovePoint();
+    }
+}
+
+void Tube::addRemovePoint()
+{
+    calculateGeometry();
+    calculateRadii();
+    if (Nint > NintPrev) // add point
+    {
+        if (Nint % 2 == 1)
+        {
+            up[1][M + 1] = customIp[0] * up[1][M-1]
+            + customIp[1] * up[1][M]
+            + customIp[2] * wp[1][0]
+            + customIp[3] * wp[1][1];
+            uv[1][M] = uvNextMPh;
+            ++M;
+        }
+        else
+        {
+            // move w vector one up (can be optimised)
+            for (int l = Mw; l >= 0; --l)
+            {
+                wp[1][l+1] = wp[1][l];
+                if (l != Mw)
+                    wv[1][l+1] = wv[1][l];
+                
+            }
+            wp[1][0] = customIp[3] * up[1][M-1]
+            + customIp[2] * up[1][M]
+            + customIp[1] * wp[1][0]
+            + customIp[0] * wp[1][1];
+            
+            wv[1][0] = wvNextmh;
+
+            ++Mw;
+        }
+    } else {
+        if (Nint % 2 == 0)
+        {
+            up[1][M] = 0;
+            --M;
+        }
+        else
+        {
+            // move w vector one down (can be optimised)
+            for (int l = 0; l <= Mw; ++l)
+            {
+                wp[1][l] = wp[1][l+1];
+            }
+            wp[1][Mw] = 0;
+            
+            --Mw;
+        }
+    }
+}
+
+
+void Tube::createCustomIp()
+{
+//    switch (dyIntType)
+//    {
+//        case dLinear:
+//        {
+//            customIp[0] = 0;
+//            customIp[1] = alfTick / (alfTick + 1.0);
+//            customIp[2] = 1.0 / (alfTick + 1.0);
+//            customIp[3] = 0;
+//            break;
+//        }
+//        case dQuadratic:
+//        case dCubic:
+//        case dAltCubic:
+//        case dQuartic:
+//            //        case dSinc:
+//        {
+            float alfTick = ((L-Mw * h) - ((M + 1) * h)) / h;
+            customIp[0] = -alfTick * (alfTick + 1.0) / ((alfTick + 2.0) * (alfTick + 3.0));
+            customIp[1] = 2.0 * alfTick / (alfTick + 2.0);
+            customIp[2] = 2.0 / (alfTick + 2.0);
+            customIp[3] = -2.0 * alfTick / ((alfTick + 3.0) * (alfTick + 2.0));
+            //            if (alf-alfTick != 0)
+            //                std::cout << "alf: " << alf << " alfTick " << alfTick << std::endl;
+            //            customIp1[3] = alf * (alf - 1) * (alf - 2) / -6.0;
+            //            customIp1[2] = (alf - 1) * (alf + 1) * (alf - 2) / 2.0;
+            //            customIp1[1] = alf * (alf + 1) * (alf - 2) / -2.0;
+            //            customIp1[0] = alf * (alf + 1) * (alf - 1) / 6.0;
+//            break;
+//        }
+//
+//        case dSinc:
+//        {
+//            int custSincWidth = 2;
+//            double custBMax = M_PI;
+//            std::vector <double> xPosCustIp (4, 0);
+//
+//            for (int i = 0; i < custSincWidth; ++i)
+//                xPosCustIp[i] = i-custSincWidth;
+//            for (int i = custSincWidth; i < custSincWidth * 2; ++i)
+//                xPosCustIp[i] = i - custSincWidth + alf;
+//
+//            for (int i = 0; i < custSincWidth * 2; ++i)
+//                customIp[i] = sin(custBMax * xPosCustIp[i]) / (xPosCustIp[i] * custBMax);
+//
+//            if (alf == 0)
+//                customIp[custSincWidth] = 1;
+//            break;
+//        }
+//    }
 }

@@ -35,6 +35,10 @@ public:
 
     void timerCallback() override;
 
+    void mouseDown (const MouseEvent& e) override;
+    void mouseDrag (const MouseEvent& e) override;
+    void mouseUp (const MouseEvent& e) override;
+
 private:
 
     // Your private member variables go here...
@@ -43,5 +47,6 @@ private:
     long t = 0;
     bool done = false;
     std::vector<std::vector<double>> geometry;
+    double pressureVal, lipFreqVal, LVal;
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (MainComponent)
 };

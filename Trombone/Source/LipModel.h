@@ -48,11 +48,8 @@ public:
     double getPower();
     
     void refreshInputParams();
-
-    void mouseDown (const MouseEvent& e) override;
-    void mouseDrag (const MouseEvent& e) override;
-    void mouseUp (const MouseEvent& e) override;
     
+    void setExtVals (double pValIn, double lFVal) { pressureVal = pValIn; lipFreqVal = lFVal; };
 private:
     double k, omega0, M, sig, Sr, w, Kcol, alpha, H0, b, eta, g, psi, psiPrev, Pm, Ub, Ur;
     double oOk, omega0Sq, kO2M, oOM, oOa1, oO2k;

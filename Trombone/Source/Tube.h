@@ -28,7 +28,7 @@ public:
     void resized() override;
 
     void calculateThermodynamicConstants();
-    int calculateGeometry (std::vector<std::vector<double>>& geometry, NamedValueSet& parameters);
+    void calculateGeometry();
     void calculateRadii();
     void calculateVelocity();
     void calculatePressure();
@@ -44,24 +44,27 @@ public:
     void updateStates();
     
     double getP (int n, int l) {
-        if (l <= M)
+        if (l <= maxM)
             return up[n][l];
         else
-            return wp[n][l-M-1];
+            return wp[n][l-maxM-1];
     };
     
     double getV (int n, int l) {
-        if (l <= M-1)
+        if (l <= maxM-1)
             return uv[n][l];
         else
-            return wv[n][l-M-1];
+            return wv[n][l-maxM-1];
     };
     
     int getNint() { return Nint; };
-    float getN() { return N; };
+    double getN() { return N; };
 
     int getM() { return M; };
     int getMw() { return Mw; };
+//    int getMaxM() { return maxM; };
+//    int getMaxMw() { return maxMw; };
+    int getMaxN() { return Nextended; }
 
     double getH() { return h; };
     double getRho() { return rho; };
@@ -80,12 +83,21 @@ public:
     double getPotEnergy1() { return potEnergy1; };
     double getRadEnergy1() { return radEnergy1; };
 
+    void setExtVals (double LVal) { LtoGoTo = LVal; };
+    void updateL();
+    
+    void addRemovePoint();
+    void createCustomIp();
 private:
     double k, h, c, lambda, rho, L, T;
-    int Nint, M, Mw;
-    int NnonExtended;
-    float N;
+    int Nint, NintPrev, M, Mw, maxM, maxMw;
+    int NnonExtended, Nextended;
+    double N;
+    double alf;
     
+    std::vector<double> quadIp;
+    std::vector<double> customIp;
+
     // Radiation vars
     double R1, rL, Lr, R2, Cr, z1, z2, z3, z4;
     double p1Next, p1, v1Next, v1;
@@ -99,7 +111,9 @@ private:
     
     std::vector<std::vector<double>> wvVecs;
     std::vector<std::vector<double>> wpVecs;
-
+    
+    std::vector<std::vector<double>> geometry;
+    double b, x0, flare;
     
     double upMP1, wpm1, uvNextMPh, uvMPh, wvNextmh, wvmh;
 
@@ -130,6 +144,8 @@ private:
     bool init = true;
     
     double qHRadPrev = 0;
+    
+    double LtoGoTo, Lprev;
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (Tube)
 };

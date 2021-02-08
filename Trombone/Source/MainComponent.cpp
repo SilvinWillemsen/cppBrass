@@ -36,6 +36,7 @@ void MainComponent::prepareToPlay (int samplesPerBlockExpected, double sampleRat
     parameters.set ("T", 26.85);
     parameters.set ("L", 2.658);
     parameters.set ("LnonExtended", 2.658);
+    parameters.set ("Lextended", 3.718);
 
     // Geometry
 //    parameters.set ("mp", 0.015 * 0.015 * double_Pi);                   // mouthpiece cross-sectional area
@@ -73,9 +74,14 @@ void MainComponent::prepareToPlay (int samplesPerBlockExpected, double sampleRat
     
     //// Input ////
     parameters.set ("Pm", 300 * Global::pressureMultiplier);
+    pressureVal = (*parameters.getVarPointer("Pm"));
+    lipFreqVal = (*parameters.getVarPointer("f0"));
+    LVal = (*parameters.getVarPointer("Lextended"));
     
     trombone = std::make_unique<Trombone> (parameters, 1.0 / fs, geometry);
     addAndMakeVisible (trombone.get());
+    
+    trombone->setExtVals (pressureVal, lipFreqVal, LVal);
     
     setSize (800, 600);
 
@@ -129,8 +135,11 @@ void MainComponent::releaseResources()
 void MainComponent::paint (Graphics& g)
 {
     // (Our component is opaque, so we must completely fill the background with a solid colour)
-    g.fillAll (getLookAndFeel().findColour (ResizableWindow::backgroundColourId));
-
+    g.fillAll (Colours::white);
+    g.drawText("Pressure: " + String (pressureVal) + "(Pa)   LipFrequency: " +
+               String (lipFreqVal) + "(Hz)   Length:" +
+               String (LVal) + "(m)",
+               getWidth() - 400, getHeight() - 50, 400, 50, Justification::centredRight);
     // You can add your drawing code here!
 }
 
@@ -139,10 +148,41 @@ void MainComponent::resized()
     // This is called when the MainContentComponent is resized.
     // If you add any child components, this is where you should
     // update their positions.
-    trombone->setBounds (getLocalBounds());
+    trombone->setBounds (getLocalBounds().withHeight (0.8 * getHeight()));
 }
 
 void MainComponent::timerCallback()
 {
     repaint();
+}
+
+
+void MainComponent::mouseDown (const MouseEvent& e)
+{
+    pressureVal = e.y * Global::pressureMultiplier;
+//    lipFreqVal = e.x;
+    lipFreqVal = 300;
+    LVal = 2.658 + 1.06 * e.x / static_cast<double> (getWidth());
+    
+    trombone->setExtVals (pressureVal, lipFreqVal, LVal);
+}
+
+void MainComponent::mouseDrag (const MouseEvent& e)
+{
+    pressureVal = e.y * Global::pressureMultiplier;
+//    lipFreqVal = e.x;
+    lipFreqVal = 300;
+    LVal = 2.658 + 1.06 * e.x / static_cast<double> (getWidth());
+
+    trombone->setExtVals (pressureVal, lipFreqVal, LVal);
+}
+
+void MainComponent::mouseUp (const MouseEvent& e)
+{
+    pressureVal = 0;
+//    lipFreqVal = e.x;
+    lipFreqVal = 300;
+    LVal = 2.658 + 1.06 * e.x / static_cast<double> (getWidth());
+
+    trombone->setExtVals (pressureVal, lipFreqVal, LVal);
 }
