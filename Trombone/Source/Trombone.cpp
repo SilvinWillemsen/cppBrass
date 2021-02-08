@@ -79,7 +79,7 @@ void Trombone::calculate()
 //#endif
 }
 
-void Trombone::calculateEnergy()
+void Trombone::calculateEnergy() 
 {
     bool excludeLip = !Global::connectedToLip;
 //    bool excludeLip = false;
