@@ -14,7 +14,6 @@
 #include "Global.h"
 #include "Tube.h"
 #include "LipModel.h"
-#include <fstream>
 //==============================================================================
 /*
 */
@@ -51,6 +50,7 @@ private:
     
     double scaledTotEnergy = 0;
     
-    std::ofstream massState, pState, vState, MSave, MwSave, energySave, scaledTotEnergySave;
+    std::ofstream massState, pState, vState, MSave, MwSave, alfSave, energySave, scaledTotEnergySave,
+        maxMSave, maxMwSave, Ssave, output;
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (Trombone)
 };

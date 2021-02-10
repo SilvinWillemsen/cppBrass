@@ -13,6 +13,7 @@
 #include <JuceHeader.h>
 #include "Global.h"
 
+
 //==============================================================================
 /*
 */
@@ -39,7 +40,10 @@ public:
         Ub = UbIn;
         Ur = UrIn;
     };
-    float getOutput() { return getP (1, N-1); };
+    float getOutput() {
+        return wp[1][Mw];
+//    return getP (1, maxM + Mw + 1);
+    };
     
     void updateStates();
     
@@ -54,23 +58,30 @@ public:
         if (l <= maxM-1)
             return uv[n][l];
         else
-            return wv[n][l-maxM-1];
+            return wv[n][l-maxM];
     };
-    
+        
     int getNint() { return Nint; };
     double getN() { return N; };
 
     int getM() { return M; };
     int getMw() { return Mw; };
-//    int getMaxM() { return maxM; };
-//    int getMaxMw() { return maxMw; };
+    int getMaxM() { return maxM; };
+    int getMaxMw() { return maxMw; };
     int getMaxN() { return Nextended; }
+    
+    double getAlf() { return alf; };
 
     double getH() { return h; };
     double getRho() { return rho; };
     double getC() { return c; };
 
-    double getS (int idx) { return S[idx]; };
+    double getS (int idx) {
+        if (idx >= S.size())
+            return 0;
+        else
+            return S[idx];
+    };
     double getSHalf (int idx) { return SHalf[idx]; };
     double getSBar (int idx) { return SBar[idx]; };
     
@@ -88,6 +99,8 @@ public:
     
     void addRemovePoint();
     void createCustomIp();
+    
+    void closeFiles();
 private:
     double k, h, c, lambda, rho, L, T;
     int Nint, NintPrev, M, Mw, maxM, maxMw;
@@ -147,5 +160,6 @@ private:
     
     double LtoGoTo, Lprev;
 
+    std::ofstream statesSave;
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (Tube)
 };

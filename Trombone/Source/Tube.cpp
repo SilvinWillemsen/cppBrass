@@ -21,10 +21,11 @@ Tube::Tube (NamedValueSet& parameters, double k, std::vector<std::vector<double>
     NnonExtended = floor (LnonExtended / h);
     Nextended = floor (static_cast<double>(*parameters.getVarPointer("Lextended")) / h);
     N = L / h;
-    if (Global::dontInterpolateAtStart)
+    if (Global::fixedNonInterpolatedL)
     {
         L = floor(N) * h;
         N = L / h;
+        alf = 0;
     }
     LtoGoTo = L;
 
@@ -36,7 +37,7 @@ Tube::Tube (NamedValueSet& parameters, double k, std::vector<std::vector<double>
     x0 = *parameters.getVarPointer ("x0");
     b = *parameters.getVarPointer ("b");
 
-    M = round(geometry[0][0] + geometry[0][1] * 0.5) * NnonExtended / LnonExtended + (Nint-NnonExtended) * 0.5;
+    M = ceil(round((geometry[0][0] + geometry[0][1] * 0.5) * NnonExtended / LnonExtended) + (Nint+1-NnonExtended) * 0.5);
     calculateGeometry();
     Mw = Nint-M;
 
@@ -129,11 +130,15 @@ Tube::Tube (NamedValueSet& parameters, double k, std::vector<std::vector<double>
     
     quadIp.resize (3, 0);
     customIp.resize (4, 0);
+    
+    statesSave.open ("statesSave.csv");
 
 }
 
 Tube::~Tube()
 {
+    closeFiles();
+
 }
 
 void Tube::paint (juce::Graphics& g)
@@ -355,7 +360,8 @@ void Tube::calculateGeometry()
 //    int mpL = Nint * double (*parameters.getVarPointer ("mpL"));
 //    int m2tL = Nint * double (*parameters.getVarPointer ("m2tL"));
 //    int bellL = Nint * double (*parameters.getVarPointer ("bellL"));
-    
+    double x = 0;
+
     if (Global::setTubeTo1)
     {
         for (int i = 0; i <= Nint; ++i)
@@ -378,10 +384,10 @@ void Tube::calculateGeometry()
             if (idx == 4) // tuning slide
             {
                 S[i] = pow(Global::linspace(geometry[1][idx], geometry[1][idx+1],
-                                        lengthInN[idx+1] -lengthInN[idx], i - curN - 1), 2) * double_Pi;
+                                        lengthInN[idx], i - curN - 1), 2) * double_Pi;
             } else if (idx == 5)
             {
-                double x = geometry[0][5] - geometry[0][5] * (i - (Nint - lengthInN[5]) - 1) / lengthInN[5];
+                x = geometry[0][5] - geometry[0][5] * (i - (Nint - lengthInN[5]) - 1) / (lengthInN[5] - 1);
 //                S[Nint-(i - (Nint - lengthInN[5]))] = pow(b * pow(((i - (Nint - lengthInN[5])) / (2.0 * lengthInN[5]) + x0), -flare), 2) * double_Pi;
                 S[i] = pow(b * pow(x + x0, -flare), 2) * double_Pi;
             } else {
@@ -417,8 +423,8 @@ void Tube::calculateGeometry()
 
 void Tube::calculateRadii()
 {
-    radii.resize (Nint, 0);
-    for (int i = 0; i < Nint; ++i)
+    radii.resize (Nint+1, 0);
+    for (int i = 0; i < Nint+1; ++i)
         radii[i] = sqrt (S[i]) / double_Pi;
     
 }
@@ -490,6 +496,7 @@ void Tube::updateL()
     alf = N - Nint;
     if (Nint != NintPrev)
     {
+        createCustomIp();
         addRemovePoint();
     }
 }
@@ -507,10 +514,19 @@ void Tube::addRemovePoint()
             + customIp[2] * wp[1][0]
             + customIp[3] * wp[1][1];
             uv[1][M] = uvNextMPh;
+            uvMPh = customIp[0] * uv[1][M-2]
+                + customIp[1] * uv[1][M-1]
+                + customIp[2] * wv[1][0]
+                + customIp[3] * wv[1][1];
             ++M;
         }
         else
         {
+            // save w0 beforehand, otherwise things will be overwritten
+            double w0 = customIp[3] * up[1][M-1]
+                + customIp[2] * up[1][M]
+                + customIp[1] * wp[1][0]
+                + customIp[0] * wp[1][1];
             // move w vector one up (can be optimised)
             for (int l = Mw; l >= 0; --l)
             {
@@ -519,15 +535,17 @@ void Tube::addRemovePoint()
                     wv[1][l+1] = wv[1][l];
                 
             }
-            wp[1][0] = customIp[3] * up[1][M-1]
-            + customIp[2] * up[1][M]
-            + customIp[1] * wp[1][0]
-            + customIp[0] * wp[1][1];
+            wp[1][0] = w0;
+            wv[1][0] = wvNextmh; // or wvmh, doesn't matter as they're the same at this point
+            wvmh = customIp[3] * uv[1][M-2]
+                + customIp[2] * uv[1][M-1]
+                + customIp[1] * wv[1][0]
+                + customIp[0] * wv[1][1];
             
-            wv[1][0] = wvNextmh;
-
             ++Mw;
         }
+        statesSave << up[1][M-1] << "," << up[1][M] << "," << wp[1][0] << "," << wp[1][1] << "," << uv[1][M-2] << "," << uv[1][M-1] << "," << wv[1][0] << "," << wv[1][1] << "," << uvMPh << "," << wvmh << "," << customIp[0] << "," << customIp[1] << "," << customIp[2] << "," << customIp[3] << ";\n";
+        
     } else {
         if (Nint % 2 == 0)
         {
@@ -600,4 +618,9 @@ void Tube::createCustomIp()
 //            break;
 //        }
 //    }
+}
+
+void Tube::closeFiles()
+{
+    statesSave.close();
 }

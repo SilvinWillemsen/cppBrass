@@ -31,11 +31,25 @@ Pm (*parameters.getVarPointer ("Pm"))
     massState.open ("massState.csv");
     pState.open ("pState.csv");
     vState.open ("vState.csv");
+    alfSave.open ("alfSave.csv");
     MSave.open ("MSave.csv");
     MwSave.open ("MwSave.csv");
     energySave.open ("energySave.csv");
     scaledTotEnergySave.open ("scaledTotEnergySave.csv");
+    
+    maxMSave.open ("maxM.csv");
+    maxMwSave.open ("maxMw.csv");
 
+    Ssave.open ("SSave.csv");
+    output.open ("output.csv");
+
+    maxMSave << tube->getMaxM();
+    maxMwSave << tube->getMaxMw();
+
+    maxMSave.close();
+    maxMwSave.close();
+
+    
 }
 
 Trombone::~Trombone()
@@ -66,7 +80,8 @@ void Trombone::resized()
 
 void Trombone::calculate()
 {
-    tube->updateL();
+    if (!Global::fixedNonInterpolatedL)
+        tube->updateL();
     tube->calculateVelocity();
     lipModel->setTubeStates (tube->getP (1, 0), tube->getV (0, 0));
     lipModel->calculateCollision();
@@ -75,10 +90,6 @@ void Trombone::calculate()
     tube->setFlowVelocities (lipModel->getUb(), lipModel->getUr());
     tube->calculatePressure();
     tube->calculateRadiation();
-
-//#if DEBUG == 1
-//    calculateEnergy();
-//#endif
 }
 
 void Trombone::calculateEnergy()
@@ -121,19 +132,33 @@ void Trombone::updateStates()
 
 void Trombone::saveToFiles()
 {
-    massState << getLipOutput() << ";\n";
-    
-    for (int l = 0; l <= tube->getMaxN() + 1; ++l)
+    if (!Global::onlyWriteOutput)
     {
-        pState << tube->getP (1, l) << ", ";
-        if (l < tube->getMaxN())
-            vState << tube->getV (1, l) << ", ";
+        massState << getLipOutput() << ";\n";
+        
+        for (int l = 0; l <= tube->getMaxN() + 1; ++l)
+        {
+            pState << tube->getP (1, l) << ", ";
+            if (l < tube->getMaxN())
+                vState << tube->getV (1, l) << ", ";
+        }
+        pState << ";\n";
+        vState << ";\n";
+        alfSave << tube->getAlf() << ";\n";
+        MSave << tube->getM() << ";\n";
+        MwSave << tube->getMw() << ";\n";
+        
+        for (int l = 0; l <= tube->getMaxN() + 1; ++l)
+        {
+            Ssave << tube->getS (l);
+            if (l == tube->getMaxN() + 1)
+                Ssave << ";\n";
+            else
+                Ssave << ",";
+        }
     }
-    pState << ";\n";
-    vState << ";\n";
+    output << tube->getOutput() << ";\n";
     
-    MSave << tube->getM() << ";\n";
-    MwSave << tube->getMw() << ";\n";
 }
 
 void Trombone::closeFiles()
@@ -141,9 +166,13 @@ void Trombone::closeFiles()
     massState.close();
     pState.close();
     vState.close();
+    alfSave.close();
     MSave.close();
     MwSave.close();
     energySave.close();
     scaledTotEnergySave.close();
+    Ssave.close();
+    output.close();
+    tube->closeFiles();
 
 }

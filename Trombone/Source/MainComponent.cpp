@@ -15,8 +15,10 @@ MainComponent::MainComponent()
     // you add any child components.
     
     // specify the number of input and output channels that we want to open
+    
     setAudioChannels (0, 2);
     startTimerHz (15);
+    
 }
 
 MainComponent::~MainComponent()
@@ -29,6 +31,13 @@ MainComponent::~MainComponent()
 //==============================================================================
 void MainComponent::prepareToPlay (int samplesPerBlockExpected, double sampleRate)
 {
+//    auto test = deviceManager.getAudioDeviceSetup();
+//    std::cout << test.sampleRate << std::endl;
+//    test.sampleRate = 44100;
+//    std::cout << deviceManager.setAudioDeviceSetup (test, false) << std::endl;
+//    auto test2 = deviceManager.getAudioDeviceSetup();
+//    std::cout << test2.sampleRate << std::endl;
+
     fs = sampleRate;
     NamedValueSet parameters;
     
@@ -106,15 +115,15 @@ void MainComponent::getNextAudioBlock (const AudioSourceChannelInfo& bufferToFil
     {
         trombone->calculate();
         output = trombone->getOutput() * 0.001 * Global::oOPressureMultiplier;
-        if (!done)
+        if (!done && Global::saveToFiles)
             trombone->saveToFiles();
         
         trombone->updateStates();
-        channelData1[i] = Global::outputClamp (output);
-        channelData2[i] = Global::outputClamp (output);
+//        channelData1[i] = Global::outputClamp (output);
+//        channelData2[i] = Global::outputClamp (output);
         ++t;
     }
-    if (t > 1000 && !done)
+    if (Global::saveToFiles && t > 1000 && !done)
     {
         done = true;
         trombone->closeFiles();

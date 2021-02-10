@@ -9,7 +9,7 @@
 */
 
 #pragma once
-
+#include <fstream>
 namespace Global {
     
     static double pressureMultiplier = 10.0;
@@ -17,8 +17,10 @@ namespace Global {
 
     static bool setTubeTo1 = false;
     static bool connectedToLip = false;
-    static bool dontInterpolateAtStart = false;
+    static bool fixedNonInterpolatedL = false;
     static bool exciteFromStart = true;
+    static bool saveToFiles = true;
+    static bool onlyWriteOutput = false;
     
     static std::vector<double> linspace (double start, double finish, int N)
     {
