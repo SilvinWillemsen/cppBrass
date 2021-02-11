@@ -55,7 +55,7 @@ Tube::Tube (NamedValueSet& parameters, double k, std::vector<std::vector<double>
 
 //    M = ceil (N*0.5);
 //    Mw = floor (N*0.5);
-    maxM = M + ceil((Nextended - NnonExtended) * 0.5); // check whether this is correct
+    maxM = M + ceil((Nextended - Nint) * 0.5); // check whether this is correct
     maxMw = Nextended - maxM;
     for (int i = 0; i < 2; ++i)
     {
@@ -215,6 +215,7 @@ Path Tube::visualiseState (Graphics& g, double visualScaling)
             if (!switchToW)
             {
                 x -= spacing;
+                x += alf * spacing;
                 switchToW = true;
             }
             newY = -wp[1][y-M-1] * visualScaling + stringBounds; // Needs to be -p, because a positive p would visually go down
@@ -490,13 +491,12 @@ void Tube::updateL()
     Lprev = L;
     NintPrev = Nint;
     
-    L = 0.000005 * LtoGoTo + 0.999995 * Lprev;
+    L = (1-LfilterCoeff) * LtoGoTo + LfilterCoeff * Lprev;
     N = L / h;
     Nint = floor(N);
     alf = N - Nint;
     if (Nint != NintPrev)
     {
-        createCustomIp();
         addRemovePoint();
     }
 }
@@ -507,6 +507,7 @@ void Tube::addRemovePoint()
     calculateRadii();
     if (Nint > NintPrev) // add point
     {
+        createCustomIp();
         if (Nint % 2 == 1)
         {
             up[1][M + 1] = customIp[0] * up[1][M-1]
@@ -544,25 +545,38 @@ void Tube::addRemovePoint()
             
             ++Mw;
         }
-        statesSave << up[1][M-1] << "," << up[1][M] << "," << wp[1][0] << "," << wp[1][1] << "," << uv[1][M-2] << "," << uv[1][M-1] << "," << wv[1][0] << "," << wv[1][1] << "," << uvMPh << "," << wvmh << "," << customIp[0] << "," << customIp[1] << "," << customIp[2] << "," << customIp[3] << ";\n";
+        statesSave << up[1][M-1] << "," << up[1][M] << "," << wp[1][0] << "," << wp[1][1] << "," << uv[1][M-2] << "," << uv[1][M-1] << "," << wv[1][0] << "," << wv[1][1] << "," << uvMPh << "," << wvmh << ";\n";
         
     } else {
         if (Nint % 2 == 0)
         {
+            uvMPh = uv[1][M-1];
+            
             up[1][M] = 0;
+            uv[1][M-1] = 0;
+            up[0][M] = 0;
+            uv[0][M-1] = 0;
             --M;
         }
         else
         {
+            wvmh = wv[1][0];
             // move w vector one down (can be optimised)
             for (int l = 0; l <= Mw; ++l)
             {
                 wp[1][l] = wp[1][l+1];
+                if (l != Mw)
+                    wv[1][l] = wv[1][l+1];
+                
             }
             wp[1][Mw] = 0;
-            
+            wv[1][Mw-1] = 0;
+            wp[0][Mw] = 0;
+            wv[0][Mw-1] = 0;
             --Mw;
         }
+        statesSave << up[1][M-1] << "," << up[1][M] << "," << wp[1][0] << "," << wp[1][1] << "," << uv[1][M-2] << "," << uv[1][M-1] << "," << wv[1][0] << "," << wv[1][1] << "," << uvMPh << "," << wvmh << ";\n";
+
     }
 }
 

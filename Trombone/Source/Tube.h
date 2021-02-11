@@ -160,6 +160,7 @@ private:
     
     double LtoGoTo, Lprev;
 
+    double LfilterCoeff = 0.9999;
     std::ofstream statesSave;
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (Tube)
 };
