@@ -45,7 +45,7 @@ void MainComponent::prepareToPlay (int samplesPerBlockExpected, double sampleRat
     parameters.set ("T", 26.85);
     parameters.set ("LnonExtended", 2.658);
     parameters.set ("Lextended", 3.718);
-    parameters.set ("L", 3.718);
+    parameters.set ("L", 2.658);
 
 
     // Geometry

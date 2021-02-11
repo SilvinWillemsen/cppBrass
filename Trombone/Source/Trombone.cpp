@@ -90,6 +90,8 @@ void Trombone::calculate()
     tube->setFlowVelocities (lipModel->getUb(), lipModel->getUr());
     tube->calculatePressure();
     tube->calculateRadiation();
+    
+    calculateEnergy();
 }
 
 void Trombone::calculateEnergy()

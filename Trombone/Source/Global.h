@@ -16,8 +16,8 @@ namespace Global {
     static double oOPressureMultiplier = 1.0 / pressureMultiplier;
 
     static bool setTubeTo1 = false;
-    static bool connectedToLip = false;
-    static bool fixedNonInterpolatedL = false;
+    static bool connectedToLip = true;
+    static bool fixedNonInterpolatedL = true;
     static bool exciteFromStart = true;
     static bool saveToFiles = true;
     static bool onlyWriteOutput = false;

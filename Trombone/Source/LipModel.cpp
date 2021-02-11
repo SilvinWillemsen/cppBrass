@@ -93,7 +93,26 @@ void LipModel::setTubeParameters (double hIn, double rho, double c, double SBar0
 void LipModel::calculateCollision()
 {
     eta = b - y;
-    g = sqrt(Kcol * (alpha+1) / 2) * pow(Global::subplus (eta), (alpha - 1.0) / 2.0);
+    etaPrev = b - yPrev;
+    // calculate yNext without collision force
+    g = 0;
+    calculateDeltaP();
+    calculate();
+    etaNext = b - yNext;
+    
+    kappa = psiPrev < 0 ? -1 : 1;
+    if (eta >= 0)
+    {
+        g = kappa * sqrt(Kcol * (alpha+1) / 2) * pow(Global::subplus (eta), (alpha - 1.0) / 2.0);
+    } else {
+        if(etaNext - etaPrev != 0)
+        {
+            g = -2.0 * psiPrev / (etaNext - etaPrev);
+        } else {
+            DBG("DIVISION BY 0");
+        }
+        
+    }
 }
 
 void LipModel::calculateDeltaP()

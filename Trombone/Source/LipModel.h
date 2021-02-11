@@ -51,7 +51,8 @@ public:
     
     void setExtVals (double pValIn, double lFVal) { pressureVal = pValIn; lipFreqVal = lFVal; };
 private:
-    double k, omega0, M, sig, Sr, w, Kcol, alpha, H0, b, eta, g, psi, psiPrev, Pm, Ub, Ur;
+    double k, omega0, M, sig, Sr, w, Kcol, alpha, H0, b, g, kappa, psi, psiPrev, Pm, Ub, Ur;
+    double etaNext, eta, etaPrev;
     double oOk, omega0Sq, kO2M, oOM, oOa1, oO2k;
     double h, SBar0, SHalf0, vNext0, p0;
     
