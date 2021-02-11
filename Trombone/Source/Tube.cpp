@@ -638,3 +638,12 @@ void Tube::closeFiles()
 {
     statesSave.close();
 }
+
+void Tube::lowPassConnection()
+{
+    double diffAtConn = wp[1][0] - up[1][M];
+    double lpCoeff = pow (1-alf, lpExponent);
+    up[1][M] = up[1][M] + lpCoeff * diffAtConn * 0.5;
+    wp[1][0] = wp[1][0] - lpCoeff * diffAtConn * 0.5;
+
+}

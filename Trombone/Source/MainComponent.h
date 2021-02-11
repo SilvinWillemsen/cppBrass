@@ -48,5 +48,6 @@ private:
     bool done = false;
     std::vector<std::vector<double>> geometry;
     double pressureVal, lipFreqVal, LVal;
+    int controlHeight, controlY;
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (MainComponent)
 };

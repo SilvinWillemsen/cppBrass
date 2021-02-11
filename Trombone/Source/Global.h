@@ -17,10 +17,12 @@ namespace Global {
 
     static bool setTubeTo1 = false;
     static bool connectedToLip = true;
-    static bool fixedNonInterpolatedL = true;
+    static bool fixedNonInterpolatedL = false;
     static bool exciteFromStart = true;
-    static bool saveToFiles = true;
+    static bool saveToFiles = false;
     static bool onlyWriteOutput = false;
+    
+    static double nonExtendedLipFreq = 520 * 0.5;
     
     static std::vector<double> linspace (double start, double finish, int N)
     {

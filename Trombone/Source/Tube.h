@@ -97,6 +97,7 @@ public:
     void setExtVals (double LVal) { LtoGoTo = LVal; };
     void updateL();
     
+    void lowPassConnection();
     void addRemovePoint();
     void createCustomIp();
     
@@ -162,5 +163,7 @@ private:
 
     double LfilterCoeff = 0.9999;
     std::ofstream statesSave;
+    
+    double lpExponent = 10;
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (Tube)
 };

@@ -45,7 +45,7 @@ void MainComponent::prepareToPlay (int samplesPerBlockExpected, double sampleRat
     parameters.set ("T", 26.85);
     parameters.set ("LnonExtended", 2.658);
     parameters.set ("Lextended", 3.718);
-    parameters.set ("L", 2.658);
+    parameters.set ("L", 3.718);
 
 
     // Geometry
@@ -124,7 +124,7 @@ void MainComponent::getNextAudioBlock (const AudioSourceChannelInfo& bufferToFil
         channelData2[i] = Global::outputClamp (output);
         ++t;
     }
-    if (Global::saveToFiles && t > 1000 && !done)
+    if (Global::saveToFiles && t > 10000 && !done)
     {
         done = true;
         trombone->closeFiles();
@@ -158,7 +158,9 @@ void MainComponent::resized()
     // This is called when the MainContentComponent is resized.
     // If you add any child components, this is where you should
     // update their positions.
-    trombone->setBounds (getLocalBounds().withHeight (0.8 * getHeight()));
+    controlHeight = 0.2 * getHeight();
+    controlY = getHeight() - controlHeight;
+    trombone->setBounds (getLocalBounds().withHeight (controlY));
 }
 
 void MainComponent::timerCallback()
@@ -169,11 +171,14 @@ void MainComponent::timerCallback()
 
 void MainComponent::mouseDown (const MouseEvent& e)
 {
-    pressureVal = e.y * Global::pressureMultiplier;
+//    pressureVal = e.y * Global::pressureMultiplier;
 //    lipFreqVal = e.x;
 //    lipFreqVal = e.y;
+    pressureVal = 300 * Global::pressureMultiplier;
     double xRatio = e.x / static_cast<double> (getWidth());
-    lipFreqVal = ((1-xRatio) + xRatio * 2.658/3.718) * 520;
+    double fineTuneRange = 0.1;
+    double fineTune = fineTuneRange * 2 * (e.y - controlY - controlHeight * 0.5) / controlHeight;
+    lipFreqVal = ((1-xRatio) + xRatio * 2.658/3.718) * Global::nonExtendedLipFreq * (1 + fineTune);
 
     LVal = 2.658 + 1.06 * e.x / static_cast<double> (getWidth());
     
@@ -182,11 +187,15 @@ void MainComponent::mouseDown (const MouseEvent& e)
 
 void MainComponent::mouseDrag (const MouseEvent& e)
 {
-    pressureVal = e.y * Global::pressureMultiplier;
+//    pressureVal = e.y * Global::pressureMultiplier;
+    pressureVal = 300 * Global::pressureMultiplier;
 //    lipFreqVal = e.x;
     double xRatio = e.x / static_cast<double> (getWidth());
-    lipFreqVal = ((1-xRatio) + xRatio * 2.658/3.718) * 520;
-//    lipFreqVal = e.y;
+    
+    double fineTuneRange = 0.1;
+    double fineTune = fineTuneRange * 2 * (e.y - controlY - controlHeight * 0.5) / controlHeight;
+    lipFreqVal = ((1-xRatio) + xRatio * 2.658/3.718) * Global::nonExtendedLipFreq * (1 + fineTune);
+    
     LVal = 2.658 + 1.06 * e.x / static_cast<double> (getWidth());
 
     trombone->setExtVals (pressureVal, lipFreqVal, LVal);
@@ -197,9 +206,9 @@ void MainComponent::mouseUp (const MouseEvent& e)
     pressureVal = 0;
 //    lipFreqVal = e.x;
 //    lipFreqVal = e.y;
-    double xRatio = e.x / static_cast<double> (getWidth());
-    lipFreqVal = ((1-xRatio) + xRatio * 2.658/3.718) * 520;
-    LVal = 2.658 + 1.06 * e.x / static_cast<double> (getWidth());
+//    double xRatio = e.x / static_cast<double> (getWidth());
+//    lipFreqVal = ((1-xRatio) + xRatio * 2.658/3.718) * 520;
+//    LVal = 2.658 + 1.06 * e.x / static_cast<double> (getWidth());
 
     trombone->setExtVals (pressureVal, lipFreqVal, LVal);
 }

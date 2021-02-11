@@ -82,6 +82,7 @@ void Trombone::calculate()
 {
     if (!Global::fixedNonInterpolatedL)
         tube->updateL();
+    tube->lowPassConnection();
     tube->calculateVelocity();
     lipModel->setTubeStates (tube->getP (1, 0), tube->getV (0, 0));
     lipModel->calculateCollision();
@@ -91,7 +92,8 @@ void Trombone::calculate()
     tube->calculatePressure();
     tube->calculateRadiation();
     
-    calculateEnergy();
+    if (Global::fixedNonInterpolatedL)
+        calculateEnergy();
 }
 
 void Trombone::calculateEnergy()
