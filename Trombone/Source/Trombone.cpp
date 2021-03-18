@@ -82,7 +82,10 @@ void Trombone::calculate()
 {
     if (!Global::fixedNonInterpolatedL)
         tube->updateL();
-    tube->lowPassConnection();
+    if (shouldLowPassConnection)
+        tube->lowPassConnection();
+    if (shouldDispCorr)
+        tube->dispCorr();
     tube->calculateVelocity();
     lipModel->setTubeStates (tube->getP (1, 0), tube->getV (0, 0));
     lipModel->calculateCollision();

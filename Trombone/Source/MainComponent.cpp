@@ -38,6 +38,9 @@ void MainComponent::prepareToPlay (int samplesPerBlockExpected, double sampleRat
 //    auto test2 = deviceManager.getAudioDeviceSetup();
 //    std::cout << test2.sampleRate << std::endl;
 
+    if (sampleRate != 44100)
+        std::cout << "sampleRate is not 44100 Hz!!" << std::endl;
+    
     fs = sampleRate;
     NamedValueSet parameters;
     
@@ -45,6 +48,7 @@ void MainComponent::prepareToPlay (int samplesPerBlockExpected, double sampleRat
     parameters.set ("T", 26.85);
     parameters.set ("LnonExtended", 2.658);
     parameters.set ("Lextended", 3.718);
+//    parameters.set ("L", 2.658);
     parameters.set ("L", 3.718);
 
 
@@ -86,8 +90,8 @@ void MainComponent::prepareToPlay (int samplesPerBlockExpected, double sampleRat
     parameters.set ("Pm", 300 * Global::pressureMultiplier);
     pressureVal = (*parameters.getVarPointer ("Pm"));
     lipFreqVal = (*parameters.getVarPointer ("f0"));
-    LVal = (*parameters.getVarPointer ("LnonExtended")); // start by contracting
-    
+//    LVal = (*parameters.getVarPointer ("LnonExtended")); // start by contracting
+    LVal = (*parameters.getVarPointer ("Lextended"));
     trombone = std::make_unique<Trombone> (parameters, 1.0 / fs, geometry);
     addAndMakeVisible (trombone.get());
     
@@ -116,15 +120,17 @@ void MainComponent::getNextAudioBlock (const AudioSourceChannelInfo& bufferToFil
     {
         trombone->calculate();
         output = trombone->getOutput() * 0.001 * Global::oOPressureMultiplier;
-        if (!done && Global::saveToFiles)
+        if (!done && Global::saveToFiles && t >= Global::startSample)
+        {
             trombone->saveToFiles();
-        
-        trombone->updateStates();
-        channelData1[i] = Global::outputClamp (output);
-        channelData2[i] = Global::outputClamp (output);
+        }
         ++t;
+
+        trombone->updateStates();
+//        channelData1[i] = Global::outputClamp (output);
+//        channelData2[i] = Global::outputClamp (output);
     }
-    if (Global::saveToFiles && t > 10000 && !done)
+    if (Global::saveToFiles && t >= Global::stopSample && !done)
     {
         done = true;
         trombone->closeFiles();
@@ -174,6 +180,13 @@ void MainComponent::mouseDown (const MouseEvent& e)
 //    pressureVal = e.y * Global::pressureMultiplier;
 //    lipFreqVal = e.x;
 //    lipFreqVal = e.y;
+    if (e.x > getWidth() - 10)
+    {
+        trombone->changeSetting (true);
+//        record = true;
+        return;
+    }
+    
     pressureVal = 300 * Global::pressureMultiplier;
     double xRatio = e.x / static_cast<double> (getWidth());
     double fineTuneRange = 0.1;
@@ -185,8 +198,13 @@ void MainComponent::mouseDown (const MouseEvent& e)
     trombone->setExtVals (pressureVal, lipFreqVal, LVal);
 }
 
+
 void MainComponent::mouseDrag (const MouseEvent& e)
 {
+    if (e.x > getWidth() - 10)
+    {
+        return;
+    }
 //    pressureVal = e.y * Global::pressureMultiplier;
     pressureVal = 300 * Global::pressureMultiplier;
 //    lipFreqVal = e.x;

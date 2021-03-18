@@ -24,7 +24,7 @@ public:
     ~Tube() override;
 
     Path drawGeometry (Graphics& g, int topOrBottom);
-    Path visualiseState (Graphics& g, double visualScaling);
+    Path visualiseState (Graphics& g, double visualScaling, bool pressure);
     void paint (juce::Graphics&) override;
     void resized() override;
 
@@ -98,10 +98,14 @@ public:
     void updateL();
     
     void lowPassConnection();
+    void dispCorr();
     void addRemovePoint();
     void createCustomIp();
     
     void closeFiles();
+    
+    void changeSetting (bool b) { setting = b; };
+    
 private:
     double k, h, c, lambda, rho, L, T;
     int Nint, NintPrev, M, Mw, maxM, maxMw;
@@ -165,5 +169,7 @@ private:
     std::ofstream statesSave;
     
     double lpExponent = 10;
+    
+    bool setting = false;
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (Tube)
 };

@@ -42,6 +42,8 @@ public:
         lipModel->setExtVals (pVal, lFVal);
         tube->setExtVals (LVal);
     };
+    
+    void changeSetting (bool b) { tube->changeSetting(b); };
 private:
     std::unique_ptr<Tube> tube;
     std::unique_ptr<LipModel> lipModel;
@@ -50,6 +52,9 @@ private:
     
     double scaledTotEnergy = 0;
     
+    bool shouldLowPassConnection = false;
+    bool shouldDispCorr = false;
+
     std::ofstream massState, pState, vState, MSave, MwSave, alfSave, energySave, scaledTotEnergySave,
         maxMSave, maxMwSave, Ssave, output;
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (Trombone)

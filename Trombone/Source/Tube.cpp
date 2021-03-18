@@ -128,6 +128,9 @@ Tube::Tube (NamedValueSet& parameters, double k, std::vector<std::vector<double>
     p1 = 0;
     v1 = 0;
     
+    lpExponent = 10;
+
+    
     quadIp.resize (3, 0);
     customIp.resize (4, 0);
     
@@ -161,7 +164,7 @@ void Tube::paint (juce::Graphics& g)
         init = false;
 //    }
     g.setColour (Colours::cyan);
-    Path state = visualiseState (g, (Global::setTubeTo1 ? 10000 : 0.01) * Global::oOPressureMultiplier);
+    Path state = visualiseState (g, (Global::setTubeTo1 ? 10000 : 0.01) * Global::oOPressureMultiplier, Global::plotPressure);
     g.strokePath (state, PathStrokeType (2.0f));
 
     
@@ -186,27 +189,31 @@ Path Tube::drawGeometry (Graphics& g, int topOrBottom)
     return stringPath;
 }
 
-Path Tube::visualiseState (Graphics& g, double visualScaling)
+Path Tube::visualiseState (Graphics& g, double visualScaling, bool pressure)
 {
+    if (!pressure)
+        visualScaling *= 100;
     auto stringBounds = getHeight() / 2.0;
     Path stringPath;
-    stringPath.startNewSubPath (0, -up[1][0] * visualScaling + stringBounds);
+    
+    stringPath.startNewSubPath (0, (pressure ? -up[1][0] : -uv[1][0]) * visualScaling + stringBounds);
+
     int stateWidth = getWidth();
-    auto spacing = stateWidth / static_cast<double>(Nint - 1);
+    auto spacing = stateWidth / static_cast<double>(Nint - (pressure ? 1 : 2));
     auto x = spacing;
     bool switchToW = false;
     
-    for (int y = 1; y <= Nint + 1; y++)
+    for (int y = 1; y <= Nint + (pressure ? 1 : -1); y++)
     {
         float newY;
-        if (y <= M)
+        if (y <= (pressure ? M : M-1))
         {
-            newY = -up[1][y] * visualScaling + stringBounds; // Needs to be -p, because a positive p would visually go down
+            newY = (pressure ? -up[1][y] : -uv[1][y]) * visualScaling + stringBounds; // Needs to be -p, because a positive p would visually go down
 //            if (y == M-1)
 //            {
 //                std::cout << x;
 //            }
-            if (isnan(x) || isinf(abs(x) || isnan(up[1][y]) || isinf(abs(up[1][y]))))
+            if (isnan(x) || isinf(abs(x) || isnan(pressure ? up[1][y] : uv[1][y]) || isinf(abs(pressure ? up[1][y] : uv[1][y]))))
             {
                 std::cout << "Wait" << std::endl;
             };
@@ -214,16 +221,16 @@ Path Tube::visualiseState (Graphics& g, double visualScaling)
         } else {
             if (!switchToW)
             {
-                x -= spacing;
+                x -= (pressure ? spacing : 0);
                 x += alf * spacing;
                 switchToW = true;
             }
-            newY = -wp[1][y-M-1] * visualScaling + stringBounds; // Needs to be -p, because a positive p would visually go down
+            newY = (pressure ? -wp[1][y-M-1] : -wv[1][y-M]) * visualScaling + stringBounds; // Needs to be -p, because a positive p would visually go down
 //            if (y == M)
 //            {
 //                std::cout << ", " << x << std::endl;;
 //            }
-            if (isnan(x) || isinf(abs(x) || isnan(wp[1][y-M]) || isinf(abs(wp[1][y-M]))))
+            if (isnan(x) || isinf(abs(x) || isnan(pressure ? wp[1][y-M-1] : wv[1][y-M]) || isinf(abs(pressure ? wp[1][y-M-1] : wv[1][y-M]))))
             {
                 std::cout << "Wait" << std::endl;
             };
@@ -490,8 +497,23 @@ void Tube::updateL()
 {
     Lprev = L;
     NintPrev = Nint;
+    double Linc = 0.0002;
+//    L = (1-LfilterCoeff) * LtoGoTo + LfilterCoeff * Lprev;
+    if (L < LtoGoTo)
+        L += Linc;
+    else if (L > LtoGoTo)
+        L-= Linc;
     
-    L = (1-LfilterCoeff) * LtoGoTo + LfilterCoeff * Lprev;
+    if (abs(L - LtoGoTo) < Linc)
+    {
+        L = LtoGoTo;
+//        if (setting)
+//            lpExponent = 100;
+//    } else {
+//        lpExponent = 10;
+    }
+    
+    
     N = L / h;
     Nint = floor(N);
     alf = N - Nint;
@@ -641,9 +663,42 @@ void Tube::closeFiles()
 
 void Tube::lowPassConnection()
 {
+    if (setting)
+        return;
     double diffAtConn = wp[1][0] - up[1][M];
+    double diffAtConnV = Nint % 2 == 1 ? (wvmh - uv[1][M-1]) : (wv[1][0] - uvMPh);
+        
+//    double diffAtConnPrev1 = wvmh - uv[1][M-1];
+//    double diffAtConnPrev2 = wv[1][0] - uvMPh;
+//    double diffAtConnPrev = wv[1][0] - uv[1][M-1];
     double lpCoeff = pow (1-alf, lpExponent);
-    up[1][M] = up[1][M] + lpCoeff * diffAtConn * 0.5;
-    wp[1][0] = wp[1][0] - lpCoeff * diffAtConn * 0.5;
+//    double lpCoeffPrev = pow (1-alf, lpExponent);
 
+    up[1][M] += lpCoeff * diffAtConn * 0.5;
+    wp[1][0] -= lpCoeff * diffAtConn * 0.5;
+    
+    if (Nint % 2 == 1)
+    {
+        uv[1][M-1] += lpCoeff * diffAtConnV * 0.5;
+        wvmh -= lpCoeff * diffAtConnV * 0.5;
+    } else {
+        uvMPh += lpCoeff * diffAtConnV * 0.5;
+        wv[1][0] -= lpCoeff * diffAtConnV * 0.5;
+    }
+
+//    uv[1][M-1] += lpCoeff * diffAtConnPrev * 0.5;
+//    wv[1][0] -= lpCoeff * diffAtConnPrev * 0.5;
+//    if (setting)
+//    {
+//        uv[1][M-1] += lpCoeffPrev * diffAtConnPrev1 * 0.5;
+//        wvmh -= lpCoeffPrev * diffAtConnPrev1 * 0.5;
+////        uvMPh += lpCoeffPrev * diffAtConnPrev2 * 0.5;
+////        wv[1][0] -= lpCoeffPrev * diffAtConnPrev2 * 0.5;
+//    }
+
+}
+
+void Tube::dispCorr()
+{
+    
 }

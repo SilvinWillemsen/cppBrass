@@ -19,9 +19,11 @@ namespace Global {
     static bool connectedToLip = true;
     static bool fixedNonInterpolatedL = false;
     static bool exciteFromStart = true;
-    static bool saveToFiles = false;
+    static bool saveToFiles = true;
     static bool onlyWriteOutput = false;
-    
+    static int startSample = 0;
+    static int stopSample = 1024;
+    static bool plotPressure = false;
     static double nonExtendedLipFreq = 520 * 0.5;
     
     static std::vector<double> linspace (double start, double finish, int N)
