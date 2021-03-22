@@ -48,8 +48,8 @@ void MainComponent::prepareToPlay (int samplesPerBlockExpected, double sampleRat
     parameters.set ("T", 26.85);
     parameters.set ("LnonExtended", 2.658);
     parameters.set ("Lextended", 3.718);
-//    parameters.set ("L", 2.658);
-    parameters.set ("L", 3.718);
+    parameters.set ("L", 2.658);
+//    parameters.set ("L", 3.718);
 
 
     // Geometry
@@ -83,7 +83,7 @@ void MainComponent::prepareToPlay (int samplesPerBlockExpected, double sampleRat
     parameters.set("w", 1e-2);                      // lip width
     parameters.set("Sr", 1.46e-5);                  // lip area
     
-    parameters.set ("Kcol", 10000);
+    parameters.set ("Kcol", 0);
     parameters.set ("alphaCol", 3);
     
     //// Input ////
@@ -122,13 +122,16 @@ void MainComponent::getNextAudioBlock (const AudioSourceChannelInfo& bufferToFil
         output = trombone->getOutput() * 0.001 * Global::oOPressureMultiplier;
         if (!done && Global::saveToFiles && t >= Global::startSample)
         {
+            if (t == 10000) // stop lipexcitation
+                trombone->setExtVals (0, lipFreqVal, LVal);
             trombone->saveToFiles();
         }
         ++t;
+        
 
         trombone->updateStates();
-//        channelData1[i] = Global::outputClamp (output);
-//        channelData2[i] = Global::outputClamp (output);
+        channelData1[i] = Global::outputClamp (output);
+        channelData2[i] = Global::outputClamp (output);
     }
     if (Global::saveToFiles && t >= Global::stopSample && !done)
     {

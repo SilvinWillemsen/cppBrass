@@ -50,6 +50,9 @@ public:
     void refreshInputParams();
     
     void setExtVals (double pValIn, double lFVal) { pressureVal = pValIn; lipFreqVal = lFVal; };
+    
+    
+    
 private:
     double k, omega0, M, sig, Sr, w, Kcol, alpha, H0, b, g, kappa, psi, psiPrev, Pm, Ub, Ur;
     double etaNext, eta, etaPrev;

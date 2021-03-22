@@ -37,7 +37,7 @@ public:
     void updateStates();
 
     void refreshLipModelInputParams() { lipModel->refreshInputParams(); };
-    
+
     void setExtVals (double pVal, double lFVal, double LVal) {
         lipModel->setExtVals (pVal, lFVal);
         tube->setExtVals (LVal);
@@ -53,7 +53,7 @@ private:
     double scaledTotEnergy = 0;
     
     bool shouldLowPassConnection = false;
-    bool shouldDispCorr = false;
+    bool shouldDispCorr = Global::useDispCorr;
 
     std::ofstream massState, pState, vState, MSave, MwSave, alfSave, energySave, scaledTotEnergySave,
         maxMSave, maxMwSave, Ssave, output;

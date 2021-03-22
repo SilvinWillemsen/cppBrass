@@ -84,8 +84,6 @@ void Trombone::calculate()
         tube->updateL();
     if (shouldLowPassConnection)
         tube->lowPassConnection();
-    if (shouldDispCorr)
-        tube->dispCorr();
     tube->calculateVelocity();
     lipModel->setTubeStates (tube->getP (1, 0), tube->getV (0, 0));
     lipModel->calculateCollision();
@@ -95,6 +93,9 @@ void Trombone::calculate()
     tube->calculatePressure();
     tube->calculateRadiation();
     
+    if (shouldDispCorr)
+        tube->dispCorr();
+
     if (Global::fixedNonInterpolatedL)
         calculateEnergy();
 }
@@ -157,7 +158,7 @@ void Trombone::saveToFiles()
         
         for (int l = 0; l <= tube->getMaxN() + 1; ++l)
         {
-            Ssave << tube->getS (l);
+            Ssave << tube->getSBar (l);
             if (l == tube->getMaxN() + 1)
                 Ssave << ";\n";
             else

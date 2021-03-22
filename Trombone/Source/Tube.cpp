@@ -43,29 +43,34 @@ Tube::Tube (NamedValueSet& parameters, double k, std::vector<std::vector<double>
 
     calculateRadii();
 
-    lambda = c * k / h;
+    lambda = Global::lambdaFact * c * k / h;
     lambdaOverRhoC = lambda / (rho * c);
     
     // initialise state vectors
     uvVecs.resize (2);
-    upVecs.resize (2);
+    upVecs.resize (3);
 
     wvVecs.resize (2);
-    wpVecs.resize (2);
+    wpVecs.resize (3);
 
 //    M = ceil (N*0.5);
 //    Mw = floor (N*0.5);
     maxM = M + ceil((Nextended - Nint) * 0.5); // check whether this is correct
     maxMw = Nextended - maxM;
+    for (int i = 0; i < 3; ++i)
+    {
+        upVecs[i] = std::vector<double> (maxM+1, 0);
+        wpVecs[i] = std::vector<double> (maxMw+1, 0);
+    }
     for (int i = 0; i < 2; ++i)
     {
         // need to change to proper sizes
         uvVecs[i] = std::vector<double> (maxM, 0);
-        upVecs[i] = std::vector<double> (maxM+1, 0);
         wvVecs[i] = std::vector<double> (maxMw, 0);
-        wpVecs[i] = std::vector<double> (maxMw+1, 0);
 
     }
+   
+
     
     if (raisedCos)// || !Global::connectedToLip)
     {
@@ -85,22 +90,26 @@ Tube::Tube (NamedValueSet& parameters, double k, std::vector<std::vector<double>
     }
     
     uv.resize (2);
-    up.resize (2);
+    up.resize (3);
     
     wv.resize (2);
-    wp.resize (2);
+    wp.resize (3);
 
+    for (int i = 0; i < 3; ++i)
+    {
+        up[i] = &upVecs[i][0];
+        wp[i] = &wpVecs[i][0];
+    }
+    
     for (int i = 0; i < 2; ++i)
     {
         uv[i] = &uvVecs[i][0];
-        up[i] = &upVecs[i][0];
         wv[i] = &wvVecs[i][0];
-        wp[i] = &wpVecs[i][0];
 
     }
-    uvMPh = 0;
+    uvMph = 0;
     wvmh = 0;
-    upMP1 = 0;
+    upMp1 = 0;
     wpm1 = 0;
     
     // Radiation
@@ -135,6 +144,9 @@ Tube::Tube (NamedValueSet& parameters, double k, std::vector<std::vector<double>
     customIp.resize (4, 0);
     
     statesSave.open ("statesSave.csv");
+    
+    uvMmhPrev = 0;
+    wvhPrev = 0;
 
 }
 
@@ -164,7 +176,10 @@ void Tube::paint (juce::Graphics& g)
         init = false;
 //    }
     g.setColour (Colours::cyan);
-    Path state = visualiseState (g, (Global::setTubeTo1 ? 10000 : 0.01) * Global::oOPressureMultiplier, Global::plotPressure);
+    Path state = visualiseState (g, (Global::setTubeTo1 ? 10000 : 0.01) * Global::oOPressureMultiplier, true);
+    g.strokePath (state, PathStrokeType (2.0f));
+    g.setColour (Colours::lime);
+    state = visualiseState (g, (Global::setTubeTo1 ? 10000 : 0.01) * Global::oOPressureMultiplier, false);
     g.strokePath (state, PathStrokeType (2.0f));
 
     
@@ -276,10 +291,10 @@ void Tube::calculateVelocity()
     quadIp[1] = 1;
     quadIp[2] = (alf - 1) / (alf + 1);
     
-    upMP1 = up[1][M] * quadIp[2]  + wp[1][0] * quadIp[1] + wp[1][1] * quadIp[0];
+    upMp1 = up[1][M] * quadIp[2]  + wp[1][0] * quadIp[1] + wp[1][1] * quadIp[0];
     wpm1 = up[1][M-1] * quadIp[0] + up[1][M] * quadIp[1]  + wp[1][0] * quadIp[2];
 
-    uvNextMPh = uvMPh - lambda / (rho * c) * (upMP1 - up[1][M]);
+    uvNextMph = uvMph - lambda / (rho * c) * (upMp1 - up[1][M]);
     wvNextmh = wvmh - lambda / (rho * c) * (wp[1][0] - wpm1);
     
 
@@ -291,7 +306,7 @@ void Tube::calculatePressure()
         up[0][l] = up[1][l] - rho * c * lambda * oOSBar[l] * (SHalf[l] * uv[0][l] - SHalf[l-1] * uv[0][l-1]);
     
     // right (inner) boundary of left system
-    up[0][M] = up[1][M] - rho * c * lambda * oOSBar[M] * (SHalf[M] * uvNextMPh - SHalf[M-1] * uv[0][M-1]);
+    up[0][M] = up[1][M] - rho * c * lambda * oOSBar[M] * (SHalf[M] * uvNextMph - SHalf[M-1] * uv[0][M-1]);
     
     for (int l = 1; l < Mw; ++l) // calculate full range minus the boundaries
         wp[0][l] = wp[1][l] - rho * c * lambda * oOSBar[l+M] * (SHalf[l+M] * wv[0][l] - SHalf[l-1+M] * wv[0][l-1]);
@@ -314,23 +329,30 @@ void Tube::calculateRadiation()
 
 void Tube::updateStates()
 {
+    uvMmhPrev = uv[1][M-1];
     uvTmp = uv[1];
     uv[1] = uv[0];
     uv[0] = uvTmp;
     
+    wvhPrev = wv[1][0];
     wvTmp = wv[1];
     wv[1] = wv[0];
     wv[0] = wvTmp;
     
-    upTmp = up[1];
+    upTmp = up[2];
+    up[2] = up[1];
     up[1] = up[0];
     up[0] = upTmp;
     
-    wpTmp = wp[1];
+    wpTmp = wp[2];
+    wp[2] = wp[1];
     wp[1] = wp[0];
     wp[0] = wpTmp;
     
-    uvMPh = uvNextMPh;
+    uvMphPrev = uvMph;
+    uvMph = uvNextMph;
+    
+    wvmhPrev = wvmh;
     wvmh = wvNextmh;
     
     p1 = p1Next;
@@ -493,36 +515,6 @@ double Tube::getRadDampEnergy()
 
 }
 
-void Tube::updateL()
-{
-    Lprev = L;
-    NintPrev = Nint;
-    double Linc = 0.0002;
-//    L = (1-LfilterCoeff) * LtoGoTo + LfilterCoeff * Lprev;
-    if (L < LtoGoTo)
-        L += Linc;
-    else if (L > LtoGoTo)
-        L-= Linc;
-    
-    if (abs(L - LtoGoTo) < Linc)
-    {
-        L = LtoGoTo;
-//        if (setting)
-//            lpExponent = 100;
-//    } else {
-//        lpExponent = 10;
-    }
-    
-    
-    N = L / h;
-    Nint = floor(N);
-    alf = N - Nint;
-    if (Nint != NintPrev)
-    {
-        addRemovePoint();
-    }
-}
-
 void Tube::addRemovePoint()
 {
     calculateGeometry();
@@ -532,15 +524,28 @@ void Tube::addRemovePoint()
         createCustomIp();
         if (Nint % 2 == 1)
         {
+            // possibly unnecessary to update up[0]
+            up[0][M + 1] = customIp[0] * up[0][M-1]
+            + customIp[1] * up[0][M]
+            + customIp[2] * wp[0][0]
+            + customIp[3] * wp[0][1];
+            
             up[1][M + 1] = customIp[0] * up[1][M-1]
             + customIp[1] * up[1][M]
             + customIp[2] * wp[1][0]
             + customIp[3] * wp[1][1];
-            uv[1][M] = uvNextMPh;
-            uvMPh = customIp[0] * uv[1][M-2]
-                + customIp[1] * uv[1][M-1]
+            
+            up[2][M + 1] = customIp[0] * up[2][M-1]
+            + customIp[1] * up[2][M]
+            + customIp[2] * wp[2][0]
+            + customIp[3] * wp[2][1];
+            
+            uv[1][M] = uvNextMph;
+            uvMph = customIp[0] * uv[1][M-1]
+                + customIp[1] * uv[1][M]
                 + customIp[2] * wv[1][0]
                 + customIp[3] * wv[1][1];
+//            uvMph = uv[1][M];
             ++M;
         }
         else
@@ -550,33 +555,47 @@ void Tube::addRemovePoint()
                 + customIp[2] * up[1][M]
                 + customIp[1] * wp[1][0]
                 + customIp[0] * wp[1][1];
+            
+            double w0Prev = customIp[3] * up[2][M-1]
+                + customIp[2] * up[2][M]
+                + customIp[1] * wp[2][0]
+                + customIp[0] * wp[2][1];
+            
             // move w vector one up (can be optimised)
             for (int l = Mw; l >= 0; --l)
             {
+                wp[0][l+1] = wp[0][l];
                 wp[1][l+1] = wp[1][l];
+                wp[2][l+1] = wp[2][l];
                 if (l != Mw)
+                {
+                    wv[0][l+1] = wv[0][l];
                     wv[1][l+1] = wv[1][l];
-                
+                }
             }
             wp[1][0] = w0;
+            wp[2][0] = w0Prev;
+
             wv[1][0] = wvNextmh; // or wvmh, doesn't matter as they're the same at this point
             wvmh = customIp[3] * uv[1][M-2]
                 + customIp[2] * uv[1][M-1]
                 + customIp[1] * wv[1][0]
                 + customIp[0] * wv[1][1];
-            
+//            wvmh = wv[1][0];
             ++Mw;
         }
-        statesSave << up[1][M-1] << "," << up[1][M] << "," << wp[1][0] << "," << wp[1][1] << "," << uv[1][M-2] << "," << uv[1][M-1] << "," << wv[1][0] << "," << wv[1][1] << "," << uvMPh << "," << wvmh << ";\n";
+        statesSave << up[1][M-1] << "," << up[1][M] << "," << wp[1][0] << "," << wp[1][1] << "," << uv[1][M-2] << "," << uv[1][M-1] << "," << wv[1][0] << "," << wv[1][1] << "," << uvMph << "," << wvmh << ";\n";
         
     } else {
         if (Nint % 2 == 0)
         {
-            uvMPh = uv[1][M-1];
+            uvMph = uv[1][M-1];
             
+            up[2][M] = 0;
             up[1][M] = 0;
-            uv[1][M-1] = 0;
             up[0][M] = 0;
+
+            uv[1][M-1] = 0;
             uv[0][M-1] = 0;
             --M;
         }
@@ -587,17 +606,21 @@ void Tube::addRemovePoint()
             for (int l = 0; l <= Mw; ++l)
             {
                 wp[1][l] = wp[1][l+1];
+                wp[2][l] = wp[2][l+1];
+
                 if (l != Mw)
                     wv[1][l] = wv[1][l+1];
                 
             }
+            wp[2][Mw] = 0;
             wp[1][Mw] = 0;
-            wv[1][Mw-1] = 0;
             wp[0][Mw] = 0;
+            
+            wv[1][Mw-1] = 0;
             wv[0][Mw-1] = 0;
             --Mw;
         }
-        statesSave << up[1][M-1] << "," << up[1][M] << "," << wp[1][0] << "," << wp[1][1] << "," << uv[1][M-2] << "," << uv[1][M-1] << "," << wv[1][0] << "," << wv[1][1] << "," << uvMPh << "," << wvmh << ";\n";
+        statesSave << up[1][M-1] << "," << up[1][M] << "," << wp[1][0] << "," << wp[1][1] << "," << uv[1][M-2] << "," << uv[1][M-1] << "," << wv[1][0] << "," << wv[1][1] << "," << uvMph << "," << wvmh << ";\n";
 
     }
 }
@@ -605,55 +628,12 @@ void Tube::addRemovePoint()
 
 void Tube::createCustomIp()
 {
-//    switch (dyIntType)
-//    {
-//        case dLinear:
-//        {
-//            customIp[0] = 0;
-//            customIp[1] = alfTick / (alfTick + 1.0);
-//            customIp[2] = 1.0 / (alfTick + 1.0);
-//            customIp[3] = 0;
-//            break;
-//        }
-//        case dQuadratic:
-//        case dCubic:
-//        case dAltCubic:
-//        case dQuartic:
-//            //        case dSinc:
-//        {
-            float alfTick = ((L-Mw * h) - ((M + 1) * h)) / h;
-            customIp[0] = -alfTick * (alfTick + 1.0) / ((alfTick + 2.0) * (alfTick + 3.0));
-            customIp[1] = 2.0 * alfTick / (alfTick + 2.0);
-            customIp[2] = 2.0 / (alfTick + 2.0);
-            customIp[3] = -2.0 * alfTick / ((alfTick + 3.0) * (alfTick + 2.0));
-            //            if (alf-alfTick != 0)
-            //                std::cout << "alf: " << alf << " alfTick " << alfTick << std::endl;
-            //            customIp1[3] = alf * (alf - 1) * (alf - 2) / -6.0;
-            //            customIp1[2] = (alf - 1) * (alf + 1) * (alf - 2) / 2.0;
-            //            customIp1[1] = alf * (alf + 1) * (alf - 2) / -2.0;
-            //            customIp1[0] = alf * (alf + 1) * (alf - 1) / 6.0;
-//            break;
-//        }
-//
-//        case dSinc:
-//        {
-//            int custSincWidth = 2;
-//            double custBMax = M_PI;
-//            std::vector <double> xPosCustIp (4, 0);
-//
-//            for (int i = 0; i < custSincWidth; ++i)
-//                xPosCustIp[i] = i-custSincWidth;
-//            for (int i = custSincWidth; i < custSincWidth * 2; ++i)
-//                xPosCustIp[i] = i - custSincWidth + alf;
-//
-//            for (int i = 0; i < custSincWidth * 2; ++i)
-//                customIp[i] = sin(custBMax * xPosCustIp[i]) / (xPosCustIp[i] * custBMax);
-//
-//            if (alf == 0)
-//                customIp[custSincWidth] = 1;
-//            break;
-//        }
-//    }
+
+    float alfTick = ((L-Mw * h) - ((M + 1) * h)) / h;
+    customIp[0] = -alfTick * (alfTick + 1.0) / ((alfTick + 2.0) * (alfTick + 3.0));
+    customIp[1] = 2.0 * alfTick / (alfTick + 2.0);
+    customIp[2] = 2.0 / (alfTick + 2.0);
+    customIp[3] = -2.0 * alfTick / ((alfTick + 3.0) * (alfTick + 2.0));
 }
 
 void Tube::closeFiles()
@@ -666,7 +646,7 @@ void Tube::lowPassConnection()
     if (setting)
         return;
     double diffAtConn = wp[1][0] - up[1][M];
-    double diffAtConnV = Nint % 2 == 1 ? (wvmh - uv[1][M-1]) : (wv[1][0] - uvMPh);
+    double diffAtConnV = Nint % 2 == 1 ? (wvmh - uv[1][M-1]) : (wv[1][0] - uvMph);
         
 //    double diffAtConnPrev1 = wvmh - uv[1][M-1];
 //    double diffAtConnPrev2 = wv[1][0] - uvMPh;
@@ -682,23 +662,70 @@ void Tube::lowPassConnection()
         uv[1][M-1] += lpCoeff * diffAtConnV * 0.5;
         wvmh -= lpCoeff * diffAtConnV * 0.5;
     } else {
-        uvMPh += lpCoeff * diffAtConnV * 0.5;
+        uvMph += lpCoeff * diffAtConnV * 0.5;
         wv[1][0] -= lpCoeff * diffAtConnV * 0.5;
     }
-
-//    uv[1][M-1] += lpCoeff * diffAtConnPrev * 0.5;
-//    wv[1][0] -= lpCoeff * diffAtConnPrev * 0.5;
-//    if (setting)
-//    {
-//        uv[1][M-1] += lpCoeffPrev * diffAtConnPrev1 * 0.5;
-//        wvmh -= lpCoeffPrev * diffAtConnPrev1 * 0.5;
-////        uvMPh += lpCoeffPrev * diffAtConnPrev2 * 0.5;
-////        wv[1][0] -= lpCoeffPrev * diffAtConnPrev2 * 0.5;
-//    }
 
 }
 
 void Tube::dispCorr()
 {
+    double etaPrev = (wp[2][0] - up[2][M]);
+    double sig0 = 50.0;
+    double rForce = (1.0 - sig0 / k) / (1.0 + sig0 / k);
+    double oOP = (h * (1.0 + sig0 / k) * (1.0-alf)) / (2.0 * h * alf + 2.0 * k * k * (1.0 + sig0 / k) * (1.0-alf));
+
+    double F = ((wp[0][0] - up[0][M]) + rForce * etaPrev) * oOP;
+
+    up[0][M] += k*k/h * F;
+    wp[0][0] -= k*k/h * F;
     
+    if (Global::correctV)
+    {
+        double etaDiv = 0.5;
+        double etaPrevV1 = (wvhPrev - uvMphPrev) * etaDiv;
+        double etaPrevV2 = (wvmhPrev - uvMmhPrev) * etaDiv;
+
+        double oOPV = (h * (1.0 + sig0 / k) * (1.0-alf)) / (2.0 * h * alf + 2.0 * etaDiv * k * k * (1.0 + sig0 / k) * (1.0-alf));
+        
+        double FV1 = ((wv[0][0] - uvNextMph) * etaDiv + rForce * etaPrevV1) * oOPV;
+        double FV2 = ((wvNextmh - uv[0][M-1]) * etaDiv + rForce * etaPrevV2) * oOPV;
+        
+        uvNextMph += k*k/h * FV1;
+        wv[0][0] -= k*k/h * FV1;
+        
+        uv[0][M-1] += k*k/h * FV2;
+        wvNextmh -= k*k/h * FV2;
+//        if (FV1 != 0)
+//            std::cout << "wait" << std::endl;
+        
+    }
+}
+
+void Tube::updateL()
+{
+    Lprev = L;
+    NintPrev = Nint;
+    double Ndiff = 1.0/50.0;
+    
+    double Linc = Ndiff * h;
+    //    L = (1-LfilterCoeff) * LtoGoTo + LfilterCoeff * Lprev;
+    if (L < LtoGoTo)
+        L += Linc;
+    else if (L > LtoGoTo)
+        L-= Linc;
+    
+    if (abs(L - LtoGoTo) < Linc)
+    {
+        L = LtoGoTo;
+    }
+    
+    
+    N = L / h;
+    Nint = floor(N);
+    alf = N - Nint;
+    if (Nint != NintPrev)
+    {
+        addRemovePoint();
+    }
 }

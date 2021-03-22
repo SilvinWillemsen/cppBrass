@@ -82,8 +82,19 @@ public:
         else
             return S[idx];
     };
-    double getSHalf (int idx) { return SHalf[idx]; };
-    double getSBar (int idx) { return SBar[idx]; };
+    double getSHalf (int idx) {
+        if (idx >= SHalf.size())
+            return 0;
+        else
+            return SHalf[idx];
+    };
+    double getSBar (int idx) {
+        if (idx >= SBar.size())
+            return 0;
+        else
+            return SBar[idx];
+        
+    };
     
     double getKinEnergy();
     double getPotEnergy();
@@ -130,11 +141,15 @@ private:
     std::vector<std::vector<double>> wvVecs;
     std::vector<std::vector<double>> wpVecs;
     
+    double uvMphPrev = 0;
+    double wvmhPrev = 0;
+    
     std::vector<std::vector<double>> geometry;
     double b, x0, flare;
     
-    double upMP1, wpm1, uvNextMPh, uvMPh, wvNextmh, wvmh;
-
+    double upMp1, wpm1, uvNextMph, uvMph, wvNextmh, wvmh;
+    double uvMmhPrev, wvhPrev;
+    
     // pointers to states
     std::vector<double*> uv;
     std::vector<double*> up;

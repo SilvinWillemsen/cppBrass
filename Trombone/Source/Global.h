@@ -22,9 +22,13 @@ namespace Global {
     static bool saveToFiles = true;
     static bool onlyWriteOutput = false;
     static int startSample = 0;
-    static int stopSample = 1024;
+    static int stopSample = 10;
     static bool plotPressure = false;
     static double nonExtendedLipFreq = 520 * 0.5;
+    
+    static double lambdaFact = 0.999;
+    static bool useDispCorr = true;
+    static bool correctV = true;
     
     static std::vector<double> linspace (double start, double finish, int N)
     {
