@@ -48,8 +48,8 @@ void MainComponent::prepareToPlay (int samplesPerBlockExpected, double sampleRat
     parameters.set ("T", 26.85);
     parameters.set ("LnonExtended", 2.658);
     parameters.set ("Lextended", 3.718);
-    parameters.set ("L", 2.658);
-//    parameters.set ("L", 3.718);
+//    parameters.set ("L", 2.658);
+    parameters.set ("L", 3.718);
 
 
     // Geometry
@@ -90,8 +90,8 @@ void MainComponent::prepareToPlay (int samplesPerBlockExpected, double sampleRat
     parameters.set ("Pm", 300 * Global::pressureMultiplier);
     pressureVal = (*parameters.getVarPointer ("Pm"));
     lipFreqVal = (*parameters.getVarPointer ("f0"));
-//    LVal = (*parameters.getVarPointer ("LnonExtended")); // start by contracting
-    LVal = (*parameters.getVarPointer ("Lextended"));
+    LVal = (*parameters.getVarPointer ("LnonExtended")); // start by contracting
+//    LVal = (*parameters.getVarPointer ("Lextended"));
     trombone = std::make_unique<Trombone> (parameters, 1.0 / fs, geometry);
     addAndMakeVisible (trombone.get());
     

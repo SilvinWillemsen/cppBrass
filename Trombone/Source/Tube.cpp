@@ -164,6 +164,7 @@ void Tube::paint (juce::Graphics& g)
        You should replace everything in this method with your own
        drawing code..
     */
+    std::cout << alf << std::endl;
     g.fillAll (getLookAndFeel().findColour (ResizableWindow::backgroundColourId));
 
 //    if (init)
@@ -207,7 +208,7 @@ Path Tube::drawGeometry (Graphics& g, int topOrBottom)
 Path Tube::visualiseState (Graphics& g, double visualScaling, bool pressure)
 {
     if (!pressure)
-        visualScaling *= 100;
+        visualScaling *= 1000;
     auto stringBounds = getHeight() / 2.0;
     Path stringPath;
     
