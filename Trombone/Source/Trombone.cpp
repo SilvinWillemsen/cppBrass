@@ -146,9 +146,9 @@ void Trombone::saveToFiles()
         
         for (int l = 0; l <= tube->getMaxN() + 1; ++l)
         {
-            pState << tube->getP (1, l) << ", ";
+            pState << tube->getP (0, l) << ", ";
             if (l < tube->getMaxN())
-                vState << tube->getV (1, l) << ", ";
+                vState << tube->getV (0, l) << ", ";
         }
         pState << ";\n";
         vState << ";\n";

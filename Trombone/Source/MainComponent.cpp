@@ -46,10 +46,10 @@ void MainComponent::prepareToPlay (int samplesPerBlockExpected, double sampleRat
     
     //// Tube ////
     parameters.set ("T", 26.85);
-    parameters.set ("LnonExtended", 2.658);
-    parameters.set ("Lextended", 3.718);
-//    parameters.set ("L", 2.658);
-    parameters.set ("L", 3.718);
+    parameters.set ("LnonExtended", Global::LnonExtended);
+    parameters.set ("Lextended", Global::Lextended);
+    parameters.set ("L", Global::LnonExtended);
+//    parameters.set ("L", 3.653);
 
 
     // Geometry
@@ -60,7 +60,7 @@ void MainComponent::prepareToPlay (int samplesPerBlockExpected, double sampleRat
     
     // Geometric information including formula from bell taken from T. Smyth "Trombone synthesis by model and measurement"
     geometry = {
-        {0.708, 0.177, 0.711, 0.306, 0.254, 0.502},         // lengths (changed fourth entry to account for bell length "error" in paper)
+        {0.708, 0.177, 0.711, 0.241, 0.254, 0.502},         // lengths (changed fourth entry to account for bell length "error" in paper)
         {0.0069, 0.0072, 0.0069, 0.0071, 0.0075, 0.0107}    // radii
     };
     
@@ -83,15 +83,15 @@ void MainComponent::prepareToPlay (int samplesPerBlockExpected, double sampleRat
     parameters.set("w", 1e-2);                      // lip width
     parameters.set("Sr", 1.46e-5);                  // lip area
     
-    parameters.set ("Kcol", 0);
+    parameters.set ("Kcol", 10000);
     parameters.set ("alphaCol", 3);
     
     //// Input ////
     parameters.set ("Pm", 300 * Global::pressureMultiplier);
     pressureVal = (*parameters.getVarPointer ("Pm"));
     lipFreqVal = (*parameters.getVarPointer ("f0"));
-    LVal = (*parameters.getVarPointer ("LnonExtended")); // start by contracting
-//    LVal = (*parameters.getVarPointer ("Lextended"));
+//    LVal = (*parameters.getVarPointer ("LnonExtended")); // start by contracting
+    LVal = (*parameters.getVarPointer ("Lextended"));
     trombone = std::make_unique<Trombone> (parameters, 1.0 / fs, geometry);
     addAndMakeVisible (trombone.get());
     
@@ -120,10 +120,10 @@ void MainComponent::getNextAudioBlock (const AudioSourceChannelInfo& bufferToFil
     {
         trombone->calculate();
         output = trombone->getOutput() * 0.001 * Global::oOPressureMultiplier;
+//        if (t > 100) // stop lipexcitation
+//            trombone->setExtVals (0, lipFreqVal, LVal);
         if (!done && Global::saveToFiles && t >= Global::startSample)
         {
-            if (t == 10000) // stop lipexcitation
-                trombone->setExtVals (0, lipFreqVal, LVal);
             trombone->saveToFiles();
         }
         ++t;
@@ -190,14 +190,15 @@ void MainComponent::mouseDown (const MouseEvent& e)
         return;
     }
     
-    pressureVal = 300 * Global::pressureMultiplier;
     double xRatio = e.x / static_cast<double> (getWidth());
-    double fineTuneRange = 0.1;
+    double fineTuneRange = 0.05;
     double fineTune = fineTuneRange * 2 * (e.y - controlY - controlHeight * 0.5) / controlHeight;
-    lipFreqVal = ((1-xRatio) + xRatio * 2.658/3.718) * Global::nonExtendedLipFreq * (1 + fineTune);
+//    lipFreqVal = ((1-xRatio) + xRatio * Global::LnonExtended/Global::Lextended) * Global::nonExtendedLipFreq * (1 + fineTune);
+    LVal = Global::LnonExtended + 1.06 * e.x / static_cast<double> (getWidth());
+    lipFreqVal = 1.895 * trombone->getTubeC() / (LVal) * (1.0 + fineTune);
+//    pressureVal = 300 * Global::pressureMultiplier * (1.0+fineTune);
+    pressureVal = 300 * Global::pressureMultiplier;
 
-    LVal = 2.658 + 1.06 * e.x / static_cast<double> (getWidth());
-    
     trombone->setExtVals (pressureVal, lipFreqVal, LVal);
 }
 
@@ -213,11 +214,13 @@ void MainComponent::mouseDrag (const MouseEvent& e)
 //    lipFreqVal = e.x;
     double xRatio = e.x / static_cast<double> (getWidth());
     
-    double fineTuneRange = 0.1;
+    double fineTuneRange = 0.05;
     double fineTune = fineTuneRange * 2 * (e.y - controlY - controlHeight * 0.5) / controlHeight;
-    lipFreqVal = ((1-xRatio) + xRatio * 2.658/3.718) * Global::nonExtendedLipFreq * (1 + fineTune);
+    lipFreqVal = ((1-xRatio) + xRatio * Global::LnonExtended/Global::Lextended) * Global::nonExtendedLipFreq * (1 + fineTune);
     
-    LVal = 2.658 + 1.06 * e.x / static_cast<double> (getWidth());
+    LVal = Global::LnonExtended + 1.06 * e.x / static_cast<double> (getWidth());
+    lipFreqVal =  1.895 * trombone->getTubeC() / (LVal) * (1.0 + fineTune);
+//    pressureVal = 300 * Global::pressureMultiplier * (1.0+fineTune);
 
     trombone->setExtVals (pressureVal, lipFreqVal, LVal);
 }

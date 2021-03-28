@@ -164,7 +164,7 @@ void Tube::paint (juce::Graphics& g)
        You should replace everything in this method with your own
        drawing code..
     */
-    std::cout << alf << std::endl;
+//    std::cout << alf << std::endl;
     g.fillAll (getLookAndFeel().findColour (ResizableWindow::backgroundColourId));
 
 //    if (init)
@@ -208,7 +208,7 @@ Path Tube::drawGeometry (Graphics& g, int topOrBottom)
 Path Tube::visualiseState (Graphics& g, double visualScaling, bool pressure)
 {
     if (!pressure)
-        visualScaling *= 1000;
+        visualScaling *= 100000;
     auto stringBounds = getHeight() / 2.0;
     Path stringPath;
     
@@ -523,6 +523,8 @@ void Tube::addRemovePoint()
     if (Nint > NintPrev) // add point
     {
         createCustomIp();
+        double vDiff = wvmh - uvMph;
+
         if (Nint % 2 == 1)
         {
             // possibly unnecessary to update up[0]
@@ -544,8 +546,8 @@ void Tube::addRemovePoint()
             uv[1][M] = uvNextMph;
             uvMph = customIp[0] * uv[1][M-1]
                 + customIp[1] * uv[1][M]
-                + customIp[2] * wv[1][0]
-                + customIp[3] * wv[1][1];
+                + customIp[2] * (wv[1][0] - vDiff)
+                + customIp[3] * (wv[1][1] - vDiff);
 //            uvMph = uv[1][M];
             ++M;
         }
@@ -578,8 +580,9 @@ void Tube::addRemovePoint()
             wp[2][0] = w0Prev;
 
             wv[1][0] = wvNextmh; // or wvmh, doesn't matter as they're the same at this point
-            wvmh = customIp[3] * uv[1][M-2]
-                + customIp[2] * uv[1][M-1]
+//            std::cout << uv[1][M-2] + vDiff << " " << uv[1][M-1] + vDiff << " " << wv[1][0] << " " << wv[1][1] << std::endl;
+            wvmh = customIp[3] * (uv[1][M-2] + vDiff)
+                + customIp[2] * (uv[1][M-1] + vDiff)
                 + customIp[1] * wv[1][0]
                 + customIp[0] * wv[1][1];
 //            wvmh = wv[1][0];
@@ -672,7 +675,7 @@ void Tube::lowPassConnection()
 void Tube::dispCorr()
 {
     double etaPrev = (wp[2][0] - up[2][M]);
-    double sig0 = 50.0;
+    double sig0 = 10.0;
     double rForce = (1.0 - sig0 / k) / (1.0 + sig0 / k);
     double oOP = (h * (1.0 + sig0 / k) * (1.0-alf)) / (2.0 * h * alf + 2.0 * k * k * (1.0 + sig0 / k) * (1.0-alf));
 
@@ -707,7 +710,7 @@ void Tube::updateL()
 {
     Lprev = L;
     NintPrev = Nint;
-    double Ndiff = 1.0/50.0;
+    double Ndiff = 1.0/Global::Nmaxdiff;
     
     double Linc = Ndiff * h;
     //    L = (1-LfilterCoeff) * LtoGoTo + LfilterCoeff * Lprev;
