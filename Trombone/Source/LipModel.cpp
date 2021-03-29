@@ -36,10 +36,14 @@ LipModel::LipModel (NamedValueSet& parameters, double k) : k (k),
     }
     
     if (Global::exciteFromStart)
+    {
+        yPrev = H0;
         pressureVal = Pm;
-    else
+    } else {
+        yPrev = 0; // energy might not like this..
         pressureVal = 0;
-//    Pm = 0;
+    }
+    //    Pm = 0;
     // In your constructor, you should add any child components, and
     // initialise any special settings that your component needs.
     oOk = 1.0 / k;
@@ -108,8 +112,13 @@ void LipModel::calculateCollision()
         if(etaNext - etaPrev != 0)
         {
             g = -2.0 * psiPrev / (etaNext - etaPrev);
+            divisBy0Flag = false;
         } else {
-            DBG("DIVISION BY 0");
+            if (!divisBy0Flag)
+            {
+                DBG("DIVISION BY 0");
+                divisBy0Flag = true;
+            }
         }
         
     }

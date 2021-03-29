@@ -48,7 +48,7 @@ void MainComponent::prepareToPlay (int samplesPerBlockExpected, double sampleRat
     parameters.set ("T", 26.85);
     parameters.set ("LnonExtended", Global::LnonExtended);
     parameters.set ("Lextended", Global::Lextended);
-    parameters.set ("L", Global::Lextended);
+    parameters.set ("L", Global::LnonExtended);
 //    parameters.set ("L", 3.653);
 
 
@@ -60,7 +60,7 @@ void MainComponent::prepareToPlay (int samplesPerBlockExpected, double sampleRat
     
     // Geometric information including formula from bell taken from T. Smyth "Trombone synthesis by model and measurement"
     geometry = {
-        {0.708, 0.177, 0.711, 0.241, 0.254, 0.502},         // lengths (changed fourth entry to account for bell length "error" in paper)
+        {0.708, 0.177, 0.711, 0.241, 0.254, 0.502},         // lengths
         {0.0069, 0.0072, 0.0069, 0.0071, 0.0075, 0.0107}    // radii
     };
     
@@ -87,7 +87,7 @@ void MainComponent::prepareToPlay (int samplesPerBlockExpected, double sampleRat
     parameters.set ("alphaCol", 3);
     
     //// Input ////
-    parameters.set ("Pm", 300 * Global::pressureMultiplier);
+    parameters.set ("Pm", (Global::exciteFromStart ? 300 : 0) * Global::pressureMultiplier);
     pressureVal = (*parameters.getVarPointer ("Pm"));
     lipFreqVal = (*parameters.getVarPointer ("f0"));
     LVal = (*parameters.getVarPointer ("LnonExtended")); // start by contracting
@@ -158,12 +158,14 @@ void MainComponent::paint (Graphics& g)
     g.fillAll (Colours::white);
     g.drawText("Pressure: " + String (pressureVal) + "(Pa)   LipFrequency: " +
                String (lipFreqVal) + "(Hz)   Length:" +
-               String (LVal) + "(m)",
+               String (Global::limit (LVal, Global::LnonExtended, Global::Lextended)) + "(m)",
                20, getHeight() - 40, 400, 40, Justification::centredLeft);
     
-    g.setColour(Colours::gold);
+    g.setColour (Colours::gold);
     g.setOpacity(mouseEllipseVisible ? 1.0 : 0.0);
     g.fillEllipse (mouseLocX-5, mouseLocY-5, 10, 10);
+    g.setColour (Colours::black);
+    g.drawLine (0, getHeight() - controlHeight * 0.5, getWidth(), getHeight() - controlHeight * 0.5);
     // You can add your drawing code here!
 }
 
@@ -172,7 +174,7 @@ void MainComponent::resized()
     // This is called when the MainContentComponent is resized.
     // If you add any child components, this is where you should
     // update their positions.
-    controlHeight = 0.2 * getHeight();
+    controlHeight = 0.3 * getHeight();
     controlY = getHeight() - controlHeight;
     trombone->setBounds (getLocalBounds().withHeight (controlY));
 }
@@ -211,22 +213,21 @@ void MainComponent::mouseDown (const MouseEvent& e)
 
 void MainComponent::mouseDrag (const MouseEvent& e)
 {
-    if (e.x > getWidth() - 10)
-    {
-        return;
-    }
+//    if (e.x > getWidth() - 10)
+//    {
+//        return;
+//    }
     double xRatio = e.x / static_cast<double> (getWidth());
     
     double fineTuneRange = 0.5;
     double fineTune = fineTuneRange * 2 * (e.y - controlY - controlHeight * 0.5) / controlHeight;
-    lipFreqVal = ((1-xRatio) + xRatio * Global::LnonExtended/Global::Lextended) * Global::nonExtendedLipFreq * (1 + fineTune);
-    
+//    lipFreqVal = ((1-xRatio) + xRatio * Global::LnonExtended/Global::Lextended) * Global::nonExtendedLipFreq * (1 + fineTune);
     LVal = Global::LnonExtended + 1.06 * e.x / static_cast<double> (getWidth());
     lipFreqVal = 2.4 * trombone->getTubeC() / (trombone->getTubeRho() * LVal) * (1.0 + fineTune);
+    lipFreqVal = Global::limit (lipFreqVal, 80, 1000);
+    
 //    lipFreqVal = 1.2 * trombone->getTubeC() / (trombone->getTubeRho() * LVal);
-    pressureVal = 300 * Global::pressureMultiplier;
-//    pressureVal = 300 * Global::pressureMultiplier * (1.0+fineTune);
-//    std::cout << fineTune << std::endl;
+    pressureVal = Global::limit (300 * Global::pressureMultiplier, 0, 6000);
     trombone->setExtVals (pressureVal, lipFreqVal, LVal);
     mouseLocX = e.x;
     mouseLocY = e.y;

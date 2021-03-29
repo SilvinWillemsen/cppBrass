@@ -105,7 +105,7 @@ public:
     double getPotEnergy1() { return potEnergy1; };
     double getRadEnergy1() { return radEnergy1; };
 
-    void setExtVals (double LVal) { LtoGoTo = LVal;};
+    void setExtVals (double LVal) { LtoGoTo = Global::limit (LVal, Global::LnonExtended, Global::Lextended); };
     void updateL();
     
     void lowPassConnection();
@@ -180,11 +180,13 @@ private:
     
     double LtoGoTo, Lprev;
 
-    double LfilterCoeff = 0.9999;
     std::ofstream statesSave;
     
     double lpExponent = 10;
     
     bool setting = false;
+    
+    double outerSlideLoc1 = 0;
+    double outerSlideLoc2 = 0;
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (Tube)
 };

@@ -18,15 +18,15 @@ namespace Global {
     static bool setTubeTo1 = false;
     static bool connectedToLip = true;
     static bool fixedNonInterpolatedL = false;
-    static bool exciteFromStart = true;
-    static bool saveToFiles = true;
+    static bool exciteFromStart = false;
+    static bool saveToFiles = false;
     static bool onlyWriteOutput = false;
     static int startSample = 0;
     static int stopSample = 1;
     static bool plotPressure = false;
     static double nonExtendedLipFreq = 520 * 0.5;
     
-    static double lambdaFact = 0.9999;
+    static double lambdaFact = 0.999;
     static double Nmaxdiff = 20.0;
     static bool useDispCorr = true;
     static bool correctV = false;
@@ -57,21 +57,26 @@ namespace Global {
     static inline double subplus (double val) { return (val + abs(val)) * 0.5; };
     
     static inline int sgn (double val) { return (0 < val) - (val < 0); };
-
-    static double outputClamp (double val)
+    
+    static double limit (double val, double min, double max)
     {
-        if (val < -1.0)
+        if (val < min)
         {
-            val = -1.0;
-            std::cout << "outputClamped!!" << std::endl;
+            val = min;
             return val;
         }
-        else if (val > 1.0)
+        else if (val > max)
         {
-            val = 1.0;
-            std::cout << "outputClamped!!" << std::endl;
+            val = max;
             return val;
         }
         return val;
     }
+    
+    static double outputClamp (double val)
+    {
+        return limit (val, -1.0, 1.0);
+    }
+    
+    
 }

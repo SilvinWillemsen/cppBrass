@@ -171,12 +171,25 @@ void Tube::paint (juce::Graphics& g)
 
 //    if (init)
 //    {
-        g.setColour (Colours::gold);
-        Path stringPathTop = drawGeometry (g, -1);
-        Path stringPathBottom = drawGeometry (g, 1);
-        g.strokePath (stringPathTop, PathStrokeType(2.0f));
-        g.strokePath (stringPathBottom, PathStrokeType(2.0f));
-        init = false;
+    g.setColour(Colours::white);
+    double x1 = outerSlideLoc1 / static_cast<double>(Nint - 1) * getWidth();
+    double x2 = outerSlideLoc2 / static_cast<double>(Nint - 1) * getWidth();
+
+    g.setOpacity (0.5);
+    Line<float> line1 (x1, getHeight() * 0.2, x1, getHeight() * 0.8);
+    Line<float> line2 (x2, getHeight() * 0.2, x2, getHeight() * 0.8);
+    std::vector<float> dashedLineVals (10, 10.0f);
+    g.drawDashedLine (line1, &dashedLineVals[0], 10);
+    g.drawDashedLine (line2, &dashedLineVals[0], 10);
+
+    g.setColour (Colours::gold);
+    g.setOpacity(1.0);
+
+    Path stringPathTop = drawGeometry (g, -1);
+    Path stringPathBottom = drawGeometry (g, 1);
+    g.strokePath (stringPathTop, PathStrokeType(2.0f));
+    g.strokePath (stringPathBottom, PathStrokeType(2.0f));
+    init = false;
 //    }
     g.setColour (Colours::cyan);
     Path state = visualiseState (g, (Global::setTubeTo1 ? 10000 : 0.01) * Global::oOPressureMultiplier, true);
@@ -394,6 +407,10 @@ void Tube::calculateGeometry()
 //    int mpL = Nint * double (*parameters.getVarPointer ("mpL"));
 //    int m2tL = Nint * double (*parameters.getVarPointer ("m2tL"));
 //    int bellL = Nint * double (*parameters.getVarPointer ("bellL"));
+    // save locations of edges of outer slide
+    outerSlideLoc1 = lengthInN[0];
+    outerSlideLoc2 = lengthInN[0] + lengthInN[1];
+    
     double x = 0;
 
     if (Global::setTubeTo1)
@@ -678,7 +695,7 @@ void Tube::lowPassConnection()
 void Tube::dispCorr()
 {
     double etaPrev = (wp[2][0] - up[2][M]);
-    double sig0 = 10.0;
+    double sig0 = 1.0;
     double rForce = (1.0 - sig0 / k) / (1.0 + sig0 / k);
     double oOP = (h * (1.0 + sig0 / k) * (1.0-alf)) / (2.0 * h * alf + 2.0 * k * k * (1.0 + sig0 / k) * (1.0-alf));
 
@@ -713,7 +730,7 @@ void Tube::updateL()
 {
     Lprev = L;
     NintPrev = Nint;
-    double Ndiff = 1.0/Global::Nmaxdiff;
+    double Ndiff = 1.0 / Global::Nmaxdiff;
     
     double Linc = Ndiff * h;
     //    L = (1-LfilterCoeff) * LtoGoTo + LfilterCoeff * Lprev;
@@ -726,8 +743,6 @@ void Tube::updateL()
     {
         L = LtoGoTo;
     }
-    
-    
     N = L / h;
     Nint = floor(N);
     alf = N - Nint;
