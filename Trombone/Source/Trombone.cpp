@@ -80,7 +80,7 @@ void Trombone::resized()
 
 void Trombone::calculate()
 {
-    if (!Global::fixedNonInterpolatedL)
+    if (!Global::fixedNonInterpolatedL && !shouldWait)
         tube->updateL();
     if (shouldLowPassConnection)
         tube->lowPassConnection();

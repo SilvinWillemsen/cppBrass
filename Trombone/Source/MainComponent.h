@@ -51,5 +51,8 @@ private:
     int controlHeight, controlY;
     
     bool record = true;
+    double mouseLocX = 0;
+    double mouseLocY = 0;
+    bool mouseEllipseVisible = false;
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (MainComponent)
 };

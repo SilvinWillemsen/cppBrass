@@ -31,6 +31,8 @@ Tube::Tube (NamedValueSet& parameters, double k, std::vector<std::vector<double>
 
     Nint = floor (N);
     NintPrev = Nint;
+    
+    alf = N - Nint;
 //    h = L / Nint;
     
     flare = *parameters.getVarPointer ("flare");
@@ -208,11 +210,11 @@ Path Tube::drawGeometry (Graphics& g, int topOrBottom)
 Path Tube::visualiseState (Graphics& g, double visualScaling, bool pressure)
 {
     if (!pressure)
-        visualScaling *= 100000;
+        visualScaling *= 1000000;
     auto stringBounds = getHeight() / 2.0;
     Path stringPath;
     
-    stringPath.startNewSubPath (0, (pressure ? -up[1][0] : -uv[1][0]) * visualScaling + stringBounds);
+    stringPath.startNewSubPath (0, (pressure ? -up[1][0] : -uv[1][0] * SHalf[0]) * visualScaling + stringBounds);
 
     int stateWidth = getWidth();
     auto spacing = stateWidth / static_cast<double>(Nint - (pressure ? 1 : 2));
@@ -224,7 +226,7 @@ Path Tube::visualiseState (Graphics& g, double visualScaling, bool pressure)
         float newY;
         if (y <= (pressure ? M : M-1))
         {
-            newY = (pressure ? -up[1][y] : -uv[1][y]) * visualScaling + stringBounds; // Needs to be -p, because a positive p would visually go down
+            newY = (pressure ? -up[1][y] : -uv[1][y] * SHalf[0]) * visualScaling + stringBounds; // Needs to be -p, because a positive p would visually go down
 //            if (y == M-1)
 //            {
 //                std::cout << x;
@@ -241,7 +243,7 @@ Path Tube::visualiseState (Graphics& g, double visualScaling, bool pressure)
                 x += alf * spacing;
                 switchToW = true;
             }
-            newY = (pressure ? -wp[1][y-M-1] : -wv[1][y-M]) * visualScaling + stringBounds; // Needs to be -p, because a positive p would visually go down
+            newY = (pressure ? -wp[1][y-M-1] : -wv[1][y-M] * SHalf[y]) * visualScaling + stringBounds; // Needs to be -p, because a positive p would visually go down
 //            if (y == M)
 //            {
 //                std::cout << ", " << x << std::endl;;
@@ -297,7 +299,8 @@ void Tube::calculateVelocity()
 
     uvNextMph = uvMph - lambda / (rho * c) * (upMp1 - up[1][M]);
     wvNextmh = wvmh - lambda / (rho * c) * (wp[1][0] - wpm1);
-    
+//    if (wvNextmh != 0)
+//        DBG("wait");
 
 }
 

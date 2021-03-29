@@ -38,8 +38,9 @@ public:
 
     void refreshLipModelInputParams() { lipModel->refreshInputParams(); };
 
-    void setExtVals (double pVal, double lFVal, double LVal) {
+    void setExtVals (double pVal, double lFVal, double LVal, bool wait = false) {
 //        lipModel->setExtVals (pVal, 2.0 * tube->getC() / (LVal));
+        shouldWait = wait;
         lipModel->setExtVals (pVal, lFVal);
         tube->setExtVals (LVal);
 //        std::cout << lFVal << " " << 2.0 * tube->getC() / (LVal) << std::endl;
@@ -48,7 +49,9 @@ public:
     void changeSetting (bool b) { tube->changeSetting(b); };
     
     double getTubeC()  { return tube->getC(); };
-    
+    double getTubeRho()  { return tube->getRho(); };
+
+    void setWait (bool w) { shouldWait = w; };
 private:
     std::unique_ptr<Tube> tube;
     std::unique_ptr<LipModel> lipModel;
@@ -62,5 +65,7 @@ private:
 
     std::ofstream massState, pState, vState, MSave, MwSave, alfSave, energySave, scaledTotEnergySave,
         maxMSave, maxMwSave, Ssave, output;
+    
+    bool shouldWait = false; // wait with changing L?
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (Trombone)
 };

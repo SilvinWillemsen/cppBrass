@@ -105,7 +105,7 @@ public:
     double getPotEnergy1() { return potEnergy1; };
     double getRadEnergy1() { return radEnergy1; };
 
-    void setExtVals (double LVal) { LtoGoTo = LVal; };
+    void setExtVals (double LVal) { LtoGoTo = LVal;};
     void updateL();
     
     void lowPassConnection();

@@ -48,7 +48,7 @@ void MainComponent::prepareToPlay (int samplesPerBlockExpected, double sampleRat
     parameters.set ("T", 26.85);
     parameters.set ("LnonExtended", Global::LnonExtended);
     parameters.set ("Lextended", Global::Lextended);
-    parameters.set ("L", Global::LnonExtended);
+    parameters.set ("L", Global::Lextended);
 //    parameters.set ("L", 3.653);
 
 
@@ -90,13 +90,12 @@ void MainComponent::prepareToPlay (int samplesPerBlockExpected, double sampleRat
     parameters.set ("Pm", 300 * Global::pressureMultiplier);
     pressureVal = (*parameters.getVarPointer ("Pm"));
     lipFreqVal = (*parameters.getVarPointer ("f0"));
-//    LVal = (*parameters.getVarPointer ("LnonExtended")); // start by contracting
-    LVal = (*parameters.getVarPointer ("Lextended"));
+    LVal = (*parameters.getVarPointer ("LnonExtended")); // start by contracting
+//    LVal = (*parameters.getVarPointer ("Lextended"));
     trombone = std::make_unique<Trombone> (parameters, 1.0 / fs, geometry);
     addAndMakeVisible (trombone.get());
     
-    trombone->setExtVals (pressureVal, lipFreqVal, LVal);
-    
+    trombone->setExtVals (pressureVal, lipFreqVal, LVal, true);
     setSize (800, 600);
 
 }
@@ -120,8 +119,10 @@ void MainComponent::getNextAudioBlock (const AudioSourceChannelInfo& bufferToFil
     {
         trombone->calculate();
         output = trombone->getOutput() * 0.001 * Global::oOPressureMultiplier;
-//        if (t > 100) // stop lipexcitation
+//        if (t == 100) // stop lipexcitation
 //            trombone->setExtVals (0, lipFreqVal, LVal);
+        if (t == 5000)
+            trombone->setWait (false);
         if (!done && Global::saveToFiles && t >= Global::startSample)
         {
             trombone->saveToFiles();
@@ -158,7 +159,11 @@ void MainComponent::paint (Graphics& g)
     g.drawText("Pressure: " + String (pressureVal) + "(Pa)   LipFrequency: " +
                String (lipFreqVal) + "(Hz)   Length:" +
                String (LVal) + "(m)",
-               getWidth() - 400, getHeight() - 50, 400, 50, Justification::centredRight);
+               20, getHeight() - 40, 400, 40, Justification::centredLeft);
+    
+    g.setColour(Colours::gold);
+    g.setOpacity(mouseEllipseVisible ? 1.0 : 0.0);
+    g.fillEllipse (mouseLocX-5, mouseLocY-5, 10, 10);
     // You can add your drawing code here!
 }
 
@@ -190,16 +195,17 @@ void MainComponent::mouseDown (const MouseEvent& e)
         return;
     }
     
-    double xRatio = e.x / static_cast<double> (getWidth());
-    double fineTuneRange = 0.05;
-    double fineTune = fineTuneRange * 2 * (e.y - controlY - controlHeight * 0.5) / controlHeight;
-//    lipFreqVal = ((1-xRatio) + xRatio * Global::LnonExtended/Global::Lextended) * Global::nonExtendedLipFreq * (1 + fineTune);
-    LVal = Global::LnonExtended + 1.06 * e.x / static_cast<double> (getWidth());
-    lipFreqVal = 1.895 * trombone->getTubeC() / (LVal) * (1.0 + fineTune);
-//    pressureVal = 300 * Global::pressureMultiplier * (1.0+fineTune);
-    pressureVal = 300 * Global::pressureMultiplier;
-
-    trombone->setExtVals (pressureVal, lipFreqVal, LVal);
+//    double xRatio = e.x / static_cast<double> (getWidth());
+//    double fineTuneRange = 0.05;
+//    double fineTune = fineTuneRange * 2 * (e.y - controlY - controlHeight * 0.5) / controlHeight;
+////    lipFreqVal = ((1-xRatio) + xRatio * Global::LnonExtended/Global::Lextended) * Global::nonExtendedLipFreq * (1 + fineTune);
+//    LVal = Global::LnonExtended + 1.06 * e.x / static_cast<double> (getWidth());
+//    lipFreqVal = 2.25 * trombone->getTubeC() / (trombone->getTubeRho() * LVal) * (1.0 + fineTune);
+////    pressureVal = 300 * Global::pressureMultiplier * (1.0+fineTune);
+//    pressureVal = 300 * Global::pressureMultiplier;
+//
+//    trombone->setExtVals (pressureVal, lipFreqVal, LVal);
+    mouseEllipseVisible = true;
 }
 
 
@@ -209,20 +215,21 @@ void MainComponent::mouseDrag (const MouseEvent& e)
     {
         return;
     }
-//    pressureVal = e.y * Global::pressureMultiplier;
-    pressureVal = 300 * Global::pressureMultiplier;
-//    lipFreqVal = e.x;
     double xRatio = e.x / static_cast<double> (getWidth());
     
-    double fineTuneRange = 0.05;
+    double fineTuneRange = 0.5;
     double fineTune = fineTuneRange * 2 * (e.y - controlY - controlHeight * 0.5) / controlHeight;
     lipFreqVal = ((1-xRatio) + xRatio * Global::LnonExtended/Global::Lextended) * Global::nonExtendedLipFreq * (1 + fineTune);
     
     LVal = Global::LnonExtended + 1.06 * e.x / static_cast<double> (getWidth());
-    lipFreqVal =  1.895 * trombone->getTubeC() / (LVal) * (1.0 + fineTune);
+    lipFreqVal = 2.4 * trombone->getTubeC() / (trombone->getTubeRho() * LVal) * (1.0 + fineTune);
+//    lipFreqVal = 1.2 * trombone->getTubeC() / (trombone->getTubeRho() * LVal);
+    pressureVal = 300 * Global::pressureMultiplier;
 //    pressureVal = 300 * Global::pressureMultiplier * (1.0+fineTune);
-
+//    std::cout << fineTune << std::endl;
     trombone->setExtVals (pressureVal, lipFreqVal, LVal);
+    mouseLocX = e.x;
+    mouseLocY = e.y;
 }
 
 void MainComponent::mouseUp (const MouseEvent& e)
@@ -235,4 +242,6 @@ void MainComponent::mouseUp (const MouseEvent& e)
 //    LVal = 2.658 + 1.06 * e.x / static_cast<double> (getWidth());
 
     trombone->setExtVals (pressureVal, lipFreqVal, LVal);
+    mouseEllipseVisible = false;
+
 }
