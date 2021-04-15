@@ -22,9 +22,13 @@ namespace Global {
     static bool saveToFiles = false;
     static bool onlyWriteOutput = false;
     static int startSample = 0;
-    static int stopSample = 1;
+    static int stopSample = 10;
     static bool plotPressure = false;
     static double nonExtendedLipFreq = 520 * 0.5;
+    
+    static bool bowing = false; // experimental stuff
+    
+    static bool useMicInput = true;
     
     static double lambdaFact = 0.999;
     static double Nmaxdiff = 20.0;

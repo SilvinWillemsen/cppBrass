@@ -16,7 +16,7 @@ MainComponent::MainComponent()
     
     // specify the number of input and output channels that we want to open
     
-    setAudioChannels (0, 2);
+    setAudioChannels (Global::useMicInput ? 2 : 0, 2);
     startTimerHz (15);
     
 }
@@ -31,12 +31,6 @@ MainComponent::~MainComponent()
 //==============================================================================
 void MainComponent::prepareToPlay (int samplesPerBlockExpected, double sampleRate)
 {
-//    auto test = deviceManager.getAudioDeviceSetup();
-//    std::cout << test.sampleRate << std::endl;
-//    test.sampleRate = 44100;
-//    std::cout << deviceManager.setAudioDeviceSetup (test, false) << std::endl;
-//    auto test2 = deviceManager.getAudioDeviceSetup();
-//    std::cout << test2.sampleRate << std::endl;
 
     if (sampleRate != 44100)
         std::cout << "sampleRate is not 44100 Hz!!" << std::endl;
@@ -70,7 +64,7 @@ void MainComponent::prepareToPlay (int samplesPerBlockExpected, double sampleRat
     parameters.set ("bellL", 0.21);                  // bell (length ratio)
     
     //// Lip ////
-    double f0 = 300.0;
+    double f0 = 300;
     double H0 = 2.9e-4;
     parameters.set("f0", f0);                       // fundamental freq lips
     parameters.set("Mr", 5.37e-5);                  // mass lips
@@ -88,14 +82,26 @@ void MainComponent::prepareToPlay (int samplesPerBlockExpected, double sampleRat
     
     //// Input ////
     parameters.set ("Pm", (Global::exciteFromStart ? 300 : 0) * Global::pressureMultiplier);
-    pressureVal = (*parameters.getVarPointer ("Pm"));
-    lipFreqVal = (*parameters.getVarPointer ("f0"));
-    LVal = (*parameters.getVarPointer ("LnonExtended")); // start by contracting
 //    LVal = (*parameters.getVarPointer ("Lextended"));
     trombone = std::make_unique<Trombone> (parameters, 1.0 / fs, geometry);
     addAndMakeVisible (trombone.get());
     
+    pressureVal = 0;
+    LVal = (*parameters.getVarPointer ("LnonExtended")); // start by contracting
+    lipFreqVal = 2.4 * trombone->getTubeC() / (trombone->getTubeRho() * LVal);
+
     trombone->setExtVals (pressureVal, lipFreqVal, LVal, true);
+    
+    lowPass = std::make_unique<LowPass> (std::vector<double> { 0.0004, 0.0017, 0.0025, 0.0017, 0.0004 },
+                                          std::vector<double> { 1, -3.1806, 3.8612, -2.1122, 0.4383 });
+    if (~Global::useMicInput)
+    {
+        pressureSlider.setRange (0, 6000);
+        pressureSlider.setValue (300 * Global::pressureMultiplier);
+        addAndMakeVisible (pressureSlider);
+        pressureSlider.addListener (this);
+        pressureSlider.setTextBoxStyle (Slider::NoTextBox, true, 0, 0);
+    }
     setSize (800, 600);
 
 }
@@ -109,18 +115,36 @@ void MainComponent::getNextAudioBlock (const AudioSourceChannelInfo& bufferToFil
     // Right now we are not producing any data, in which case we need to clear the buffer
     // (to prevent the output of random noise)
     
+    const float* input = bufferToFill.buffer->getReadPointer (0, bufferToFill.startSample);
+
+    double avg = 0;
+    
+    for (int i = 0; i < bufferToFill.numSamples; ++i)
+        avg += input[i] * input[i];
+    avg /= bufferToFill.numSamples;
+    avg = sqrt(avg);
+
+    std::cout << avg << std::endl;
+    
     float* const channelData1 = bufferToFill.buffer->getWritePointer (0, bufferToFill.startSample);
     float* const channelData2 = bufferToFill.buffer->getWritePointer (1, bufferToFill.startSample);
     
     float output = 0.0;
     float output2 = 0.0;
+
+    if (Global::useMicInput)
+    {
+        pressureVal = 1200 * avg;
+        trombone->setExtVals(1200 * avg, lipFreqVal, LVal);
+    }
     
     for (int i = 0; i < bufferToFill.numSamples; ++i)
     {
         trombone->calculate();
         output = trombone->getOutput() * 0.001 * Global::oOPressureMultiplier;
+        output = lowPass->filter (output);
 //        if (t == 100) // stop lipexcitation
-//            trombone->setExtVals (0, lipFreqVal, LVal);
+//            trombone->setExtVals (0, lipFreqVal, LVal);-
         if (t == 5000)
             trombone->setWait (false);
         if (!done && Global::saveToFiles && t >= Global::startSample)
@@ -141,6 +165,7 @@ void MainComponent::getNextAudioBlock (const AudioSourceChannelInfo& bufferToFil
         std::cout << "done" << std::endl;
     }
     trombone->refreshLipModelInputParams();
+//    std::cout << output << std::endl;
 }
 
 void MainComponent::releaseResources()
@@ -155,18 +180,69 @@ void MainComponent::releaseResources()
 void MainComponent::paint (Graphics& g)
 {
     // (Our component is opaque, so we must completely fill the background with a solid colour)
-    g.fillAll (Colours::white);
-    g.drawText("Pressure: " + String (pressureVal) + "(Pa)   LipFrequency: " +
-               String (lipFreqVal) + "(Hz)   Length:" +
-               String (Global::limit (LVal, Global::LnonExtended, Global::Lextended)) + "(m)",
-               20, getHeight() - 40, 400, 40, Justification::centredLeft);
+//    if (lowPass2->isOn())
+//        g.fillAll (Colours::green);
+//    else if (lowPass4->isOn())
+//        g.fillAll (Colours::yellow);
+//    else
+    g.fillAll (Colours::lightgrey);
+
+    int bottombarHeight = 40;
+    int textWidth = 50;
+    int numDecimals = 2;
+    int margin = 20;
     
+    String decimalString = "";
+    
+    for (int i = 0; i < numDecimals; ++i)
+    {
+        decimalString += "8";
+    }
+    
+    bottomBar = getLocalBounds()
+        .withHeight (bottombarHeight)
+        .withY (getHeight()-bottombarHeight);
+    bottomBar.removeFromLeft (margin);
+    
+    Font font = g.getCurrentFont();
+    StringArray strings = { "Lip Frequency (Hz): ", "Length (m): ", "Pressure (Pa): " };
+    // Lipfreq label
+    g.drawText(strings[0]
+               + String (floor(lipFreqVal * pow(10, numDecimals)) * pow(10, -numDecimals)),
+               bottomBar.removeFromLeft (font.getStringWidth(strings[0] + "888." + decimalString)),
+               Justification::centredLeft);
+    bottomBar.reduce (margin, 0);
+    
+    // Tubelength label
+    g.drawText (strings[1]
+               + String (floor(LVal * pow(10, numDecimals)) * pow(10, -numDecimals)),
+               bottomBar.removeFromLeft (font.getStringWidth(strings[1] + "8." + decimalString)),
+               Justification::centredLeft);
+    bottomBar.removeFromLeft (margin);
+    
+    // Pressure label
+    g.setColour (pressureVal == 0 ? Colours::grey : Colours::black);
+    g.drawText(strings[2]
+               + String (floor((Global::useMicInput ? pressureVal : pressureValSave) * pow(10, numDecimals)) * pow(10, -numDecimals)),
+               bottomBar.removeFromLeft (font.getStringWidth (strings[2] + "8888." + decimalString)),
+               Justification::centredLeft);
+    
+//    g.drawText("LowPass: " + String (lowPass->isOn() ? "on" : "off"),
+//               getWidth() - 120, getHeight() - 40, 100, 40, Justification::centredRight);
+
     g.setColour (Colours::gold);
-    g.setOpacity(mouseEllipseVisible ? 1.0 : 0.0);
+    g.setOpacity (mouseEllipseVisible ? 1.0 : 0.0);
     g.fillEllipse (mouseLocX-5, mouseLocY-5, 10, 10);
     g.setColour (Colours::black);
     g.drawLine (0, getHeight() - controlHeight * 0.5, getWidth(), getHeight() - controlHeight * 0.5);
-    // You can add your drawing code here!
+
+    if (init)
+    {
+        sliderBounds = bottomBar;
+        resized();
+        init = false;
+    }
+    
 }
 
 void MainComponent::resized()
@@ -177,6 +253,9 @@ void MainComponent::resized()
     controlHeight = 0.3 * getHeight();
     controlY = getHeight() - controlHeight;
     trombone->setBounds (getLocalBounds().withHeight (controlY));
+
+    if (!Global::useMicInput)
+        pressureSlider.setBounds (sliderBounds);
 }
 
 void MainComponent::timerCallback()
@@ -192,8 +271,9 @@ void MainComponent::mouseDown (const MouseEvent& e)
 //    lipFreqVal = e.y;
     if (e.x > getWidth() - 10)
     {
-        trombone->changeSetting (true);
+//        trombone->changeSetting (true);
 //        record = true;
+        lowPass->toggleOnOff();
         return;
     }
     
@@ -222,12 +302,16 @@ void MainComponent::mouseDrag (const MouseEvent& e)
     double fineTuneRange = 0.5;
     double fineTune = fineTuneRange * 2 * (e.y - controlY - controlHeight * 0.5) / controlHeight;
 //    lipFreqVal = ((1-xRatio) + xRatio * Global::LnonExtended/Global::Lextended) * Global::nonExtendedLipFreq * (1 + fineTune);
-    LVal = Global::LnonExtended + 1.06 * e.x / static_cast<double> (getWidth());
+    LVal = Global::LnonExtended + (Global::Lextended - Global::LnonExtended) * e.x / static_cast<double> (getWidth());
     lipFreqVal = 2.4 * trombone->getTubeC() / (trombone->getTubeRho() * LVal) * (1.0 + fineTune);
-    lipFreqVal = Global::limit (lipFreqVal, 80, 1000);
+    lipFreqVal = Global::limit (lipFreqVal, 20, 1000);
     
 //    lipFreqVal = 1.2 * trombone->getTubeC() / (trombone->getTubeRho() * LVal);
-    pressureVal = Global::limit (300 * Global::pressureMultiplier, 0, 6000);
+    if (!Global::useMicInput)
+    {
+        pressureVal = pressureSlider.getValue();
+        pressureValSave = pressureVal; // used for text
+    }
     trombone->setExtVals (pressureVal, lipFreqVal, LVal);
     mouseLocX = e.x;
     mouseLocY = e.y;
@@ -245,4 +329,12 @@ void MainComponent::mouseUp (const MouseEvent& e)
     trombone->setExtVals (pressureVal, lipFreqVal, LVal);
     mouseEllipseVisible = false;
 
+}
+
+void MainComponent::sliderValueChanged (Slider* slider)
+{
+    pressureValSave = pressureSlider.getValue();
+//    if (slider == &pressureSlider)
+//        pressureVal = pressureSlider.getValue();
+//    trombone->setExtVals (pressureVal, lipFreqVal, LVal);
 }

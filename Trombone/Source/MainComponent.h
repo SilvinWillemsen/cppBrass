@@ -11,13 +11,14 @@
 #include "../JuceLibraryCode/JuceHeader.h"
 #include "Global.h"
 #include "Trombone.h"
+#include "LowPass.h"
 
 //==============================================================================
 /*
     This component lives inside our window, and this is where you should put all
     your controls and content.
 */
-class MainComponent   : public AudioAppComponent, public Timer
+class MainComponent   : public AudioAppComponent, public Timer, public Slider::Listener
 {
 public:
     //==============================================================================
@@ -38,6 +39,8 @@ public:
     void mouseDown (const MouseEvent& e) override;
     void mouseDrag (const MouseEvent& e) override;
     void mouseUp (const MouseEvent& e) override;
+    
+    void sliderValueChanged (Slider* slider) override;
 
 private:
 
@@ -54,5 +57,13 @@ private:
     double mouseLocX = 0;
     double mouseLocY = 0;
     bool mouseEllipseVisible = false;
+    
+    std::unique_ptr<LowPass> lowPass;
+    
+    Slider pressureSlider;
+    Rectangle<int> sliderBounds { 0, 0, 100, 40 };
+    Rectangle<int> bottomBar;
+    bool init = true;
+    double pressureValSave = 0;
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (MainComponent)
 };

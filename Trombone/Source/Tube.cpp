@@ -81,7 +81,7 @@ Tube::Tube (NamedValueSet& parameters, double k, std::vector<std::vector<double>
         int start = 20;
         int end = 30;
         
-        double scaling = 1000.0;
+        double scaling = 100000.0;
         for (int n = 0; n < 2; ++n)
         {
             for (int l = start; l < end; ++l)
@@ -149,6 +149,19 @@ Tube::Tube (NamedValueSet& parameters, double k, std::vector<std::vector<double>
     
     uvMmhPrev = 0;
     wvhPrev = 0;
+    
+    if (Global::bowing)
+    {
+        // Simple (exponential) Bow Model
+        a = 100; // Free parameter
+        BM = sqrt(2 * a) * exp(0.5);
+        
+        Vb = 0.1; // Bowing speed
+        Fb = 8000;  // Bowing force / total mass of system;
+        vrelPrev = 0;
+        
+        tol = 1e-7;
+    }
 
 }
 
@@ -312,6 +325,9 @@ void Tube::calculateVelocity()
 
     uvNextMph = uvMph - lambda / (rho * c) * (upMp1 - up[1][M]);
     wvNextmh = wvmh - lambda / (rho * c) * (wp[1][0] - wpm1);
+    
+    if (Global::bowing)
+        uv[0][0] = uv[0][0] - k / h * BM * Fb * vrel * exp (-a * vrel * vrel);
 //    if (wvNextmh != 0)
 //        DBG("wait");
 
@@ -333,6 +349,9 @@ void Tube::calculatePressure()
     
     // excitation
     up[0][0] = up[1][0] - rho * c * lambda * oOSBar[0] * (-2.0 * (Ub + Ur) + 2.0 * SHalf[0] * uv[0][0]);
+    
+//    if (Global::bowing)
+//        up[0][0] = up[0][0] - bowExcitation;
 //    std::cout << up[0][M-1] - wp[0][0] << std::endl;
 }
 
@@ -750,4 +769,29 @@ void Tube::updateL()
     {
         addRemovePoint();
     }
+}
+
+void Tube::calculateVRel()
+{
+    vrel = uv[0][1] - Vb;
+    
+//    beta = SBar[0] / (rho * c * c) * Vb + 1.0 / h * (2.0 * SHalf[0] * uv[0][0]);
+//    //        std::cout<< "Exponential model" << std::endl;
+//    eps = 1;
+//    int i = 0;
+//    while (eps > tol)
+//    {
+//        vrel = vrelPrev - (Fb * BM / h * vrelPrev * exp(-a * vrelPrev * vrelPrev) + SBar[0] / (rho * c * c) * vrel + beta)
+//                        / (Fb * BM / h * (1.0 - 2.0 * a * vrelPrev * vrelPrev) * exp(-a * vrelPrev * vrelPrev) + SBar[0] / (rho * c * c));
+//        eps = std::abs(vrel - vrelPrev);
+////        std::cout << eps << std::endl;
+//        vrelPrev = vrel;
+//        ++i;
+//        if (i > 100)
+//        {
+//            std::cout << "Nope" << std::endl;
+//        }
+//    }
+//    std::cout << i << std::endl;
+//    bowExcitation = k * (1.0 / h) * BM * Fb * vrel * exp (-a * vrel * vrel);
 }

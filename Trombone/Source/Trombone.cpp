@@ -84,12 +84,20 @@ void Trombone::calculate()
         tube->updateL();
     if (shouldLowPassConnection)
         tube->lowPassConnection();
+    
+    if (Global::bowing)
+        tube->calculateVRel();
+    
     tube->calculateVelocity();
-    lipModel->setTubeStates (tube->getP (1, 0), tube->getV (0, 0));
-    lipModel->calculateCollision();
-    lipModel->calculateDeltaP();
-    lipModel->calculate();
-    tube->setFlowVelocities (lipModel->getUb(), lipModel->getUr());
+    
+    if (Global::connectedToLip)
+    {   lipModel->setTubeStates (tube->getP (1, 0), tube->getV (0, 0));
+        lipModel->calculateCollision();
+        lipModel->calculateDeltaP();
+        lipModel->calculate();
+        tube->setFlowVelocities (lipModel->getUb(), lipModel->getUr());
+    }
+    
     tube->calculatePressure();
     tube->calculateRadiation();
     

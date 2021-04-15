@@ -117,6 +117,7 @@ public:
     
     void changeSetting (bool b) { setting = b; };
     
+    void calculateVRel(); // experimental bowing
 private:
     double k, h, c, lambda, rho, L, T;
     int Nint, NintPrev, M, Mw, maxM, maxMw;
@@ -188,5 +189,8 @@ private:
     
     double outerSlideLoc1 = 0;
     double outerSlideLoc2 = 0;
+    
+    double vrel, vrelPrev, Fb, Vb, BM, beta, a, eps, tol;
+    double bowExcitation = 0;
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (Tube)
 };
