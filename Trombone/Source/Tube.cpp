@@ -162,6 +162,8 @@ Tube::Tube (NamedValueSet& parameters, double k, std::vector<std::vector<double>
         
         tol = 1e-7;
     }
+    
+    numOutputPoints = radii[radii.size()-1] / L * N;
 
 }
 
@@ -218,7 +220,7 @@ void Tube::paint (juce::Graphics& g)
 
 Path Tube::drawGeometry (Graphics& g, int topOrBottom)
 {
-    double visualScaling = 10.0 * getHeight();
+    double visualScaling = 5.642 * getHeight();
     Path stringPath;
     stringPath.startNewSubPath (0, topOrBottom * radii[0] * visualScaling + getHeight() * 0.5);
     int stateWidth = getWidth();
@@ -495,7 +497,7 @@ void Tube::calculateRadii()
 {
     radii.resize (Nint+1, 0);
     for (int i = 0; i < Nint+1; ++i)
-        radii[i] = sqrt (S[i]) / double_Pi;
+        radii[i] = sqrt (S[i] / double_Pi);
     
 }
 double Tube::getKinEnergy()

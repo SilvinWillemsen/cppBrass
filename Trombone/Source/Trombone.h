@@ -46,6 +46,7 @@ public:
 //        std::cout << lFVal << " " << 2.0 * tube->getC() / (LVal) << std::endl;
     };
     
+    void changeSetting () { tube->changeSetting(); };
     void changeSetting (bool b) { tube->changeSetting(b); };
     
     double getTubeC()  { return tube->getC(); };

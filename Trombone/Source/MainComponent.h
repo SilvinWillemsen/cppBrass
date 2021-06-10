@@ -65,5 +65,6 @@ private:
     Rectangle<int> bottomBar;
     bool init = true;
     double pressureValSave = 0;
+    
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (MainComponent)
 };

@@ -115,17 +115,6 @@ void MainComponent::getNextAudioBlock (const AudioSourceChannelInfo& bufferToFil
     // Right now we are not producing any data, in which case we need to clear the buffer
     // (to prevent the output of random noise)
     
-    const float* input = bufferToFill.buffer->getReadPointer (0, bufferToFill.startSample);
-
-    double avg = 0;
-    
-    for (int i = 0; i < bufferToFill.numSamples; ++i)
-        avg += input[i] * input[i];
-    avg /= bufferToFill.numSamples;
-    avg = sqrt(avg);
-
-    std::cout << avg << std::endl;
-    
     float* const channelData1 = bufferToFill.buffer->getWritePointer (0, bufferToFill.startSample);
     float* const channelData2 = bufferToFill.buffer->getWritePointer (1, bufferToFill.startSample);
     
@@ -134,6 +123,13 @@ void MainComponent::getNextAudioBlock (const AudioSourceChannelInfo& bufferToFil
 
     if (Global::useMicInput)
     {
+        const float* input = bufferToFill.buffer->getReadPointer (0, bufferToFill.startSample);
+        double avg = 0;
+        for (int i = 0; i < bufferToFill.numSamples; ++i)
+            avg += input[i] * input[i];
+        avg /= bufferToFill.numSamples;
+        avg = sqrt(avg);
+        
         pressureVal = 1200 * avg;
         trombone->setExtVals(1200 * avg, lipFreqVal, LVal);
     }
@@ -142,7 +138,8 @@ void MainComponent::getNextAudioBlock (const AudioSourceChannelInfo& bufferToFil
     {
         trombone->calculate();
         output = trombone->getOutput() * 0.001 * Global::oOPressureMultiplier;
-        output = lowPass->filter (output);
+//        if (setting)
+//            output = lowPass->filter (output);
 //        if (t == 100) // stop lipexcitation
 //            trombone->setExtVals (0, lipFreqVal, LVal);-
         if (t == 5000)
@@ -271,9 +268,10 @@ void MainComponent::mouseDown (const MouseEvent& e)
 //    lipFreqVal = e.y;
     if (e.x > getWidth() - 10)
     {
-//        trombone->changeSetting (true);
+//        trombone->changeSetting();
+//        setting = !setting;
 //        record = true;
-        lowPass->toggleOnOff();
+//        lowPass->toggleOnOff();
         return;
     }
     

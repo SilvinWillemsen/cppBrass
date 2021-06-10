@@ -28,7 +28,7 @@ namespace Global {
     
     static bool bowing = false; // experimental stuff
     
-    static bool useMicInput = true;
+    static bool useMicInput = false;
     
     static double lambdaFact = 0.999;
     static double Nmaxdiff = 20.0;
