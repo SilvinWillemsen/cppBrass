@@ -119,35 +119,30 @@ void MainComponent::getNextAudioBlock (const AudioSourceChannelInfo& bufferToFil
     float* const channelData2 = bufferToFill.buffer->getWritePointer (1, bufferToFill.startSample);
     
     float output = 0.0;
-    float output2 = 0.0;
 
-    if (Global::useMicInput)
-    {
-        const float* input = bufferToFill.buffer->getReadPointer (0, bufferToFill.startSample);
-        double avg = 0;
-        for (int i = 0; i < bufferToFill.numSamples; ++i)
-            avg += input[i] * input[i];
-        avg /= bufferToFill.numSamples;
-        avg = sqrt(avg);
-        
-        pressureVal = 1200 * avg;
-        trombone->setExtVals(1200 * avg, lipFreqVal, LVal);
-    }
+//    if (Global::useMicInput)
+//    {
+//        const float* input = bufferToFill.buffer->getReadPointer (0, bufferToFill.startSample);
+//        double avg = 0;
+//        for (int i = 0; i < bufferToFill.numSamples; ++i)
+//            avg += input[i] * input[i];
+//        avg /= bufferToFill.numSamples;
+//        avg = sqrt(avg);
+//
+//        pressureVal = 1200 * avg;
+//        trombone->setExtVals(1200 * avg, lipFreqVal, LVal);
+//    }
     
     for (int i = 0; i < bufferToFill.numSamples; ++i)
     {
         trombone->calculate();
         output = trombone->getOutput() * 0.001 * Global::oOPressureMultiplier;
-//        if (setting)
         output = lowPass->filter (output);
-//        if (t == 100) // stop lipexcitation
-//            trombone->setExtVals (0, lipFreqVal, LVal);-
-        if (t == 5000)
-            trombone->setWait (false);
-        if (!done && Global::saveToFiles && t >= Global::startSample)
-        {
-            trombone->saveToFiles();
-        }
+
+//        if (!done && Global::saveToFiles && t >= Global::startSample)
+//        {
+//            trombone->saveToFiles();
+//        }
         ++t;
         
 
