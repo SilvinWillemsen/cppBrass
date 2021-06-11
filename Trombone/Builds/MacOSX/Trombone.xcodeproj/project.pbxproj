@@ -47,6 +47,7 @@
 		E4DF1E0E8890A20D985BD5EB /* sensel.c */ = {isa = PBXBuildFile; fileRef = 64E54D666155729F4827AC5B; };
 		E94D274CB28BD3DA79D6A289 /* include_juce_audio_basics.mm */ = {isa = PBXBuildFile; fileRef = A5CB99D1BCCE8A83445FF249; };
 		F408A565F8FDAAEDE77DB757 /* include_juce_audio_utils.mm */ = {isa = PBXBuildFile; fileRef = ED7C59926A605EA4F3046B7A; };
+		F6319C7875ED2394B6F75997 /* include_juce_dsp.mm */ = {isa = PBXBuildFile; fileRef = 83711E0069414A76023C2B73; };
 		F7DDE7E92A1642F9E85260BE /* RecentFilesMenuTemplate.nib */ = {isa = PBXBuildFile; fileRef = E2411C65BA6853DEEEE39B25; };
 		F948AECA6E017404B4A4EF51 /* include_juce_events.mm */ = {isa = PBXBuildFile; fileRef = 6E44945A77A7798A0313F294; };
 		FD0CA884917E7635B89287C9 /* Main.cpp */ = {isa = PBXBuildFile; fileRef = 6DF3D34E7DCBD7401D5A4479; };
@@ -94,6 +95,7 @@
 		7B6E33DEF25094953C75F5B8 /* juce_audio_processors */ /* juce_audio_processors */ = {isa = PBXFileReference; lastKnownFileType = folder; name = juce_audio_processors; path = ../../../newJUCE/JUCE/modules/juce_audio_processors; sourceTree = SOURCE_ROOT; };
 		7DA68134570697767EF63D17 /* include_juce_data_structures.mm */ /* include_juce_data_structures.mm */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.objcpp; name = include_juce_data_structures.mm; path = ../../JuceLibraryCode/include_juce_data_structures.mm; sourceTree = SOURCE_ROOT; };
 		8032E4FCFFFC1FD2C615D08F /* juce_opengl */ /* juce_opengl */ = {isa = PBXFileReference; lastKnownFileType = folder; name = juce_opengl; path = ../../../newJUCE/JUCE/modules/juce_opengl; sourceTree = SOURCE_ROOT; };
+		83711E0069414A76023C2B73 /* include_juce_dsp.mm */ /* include_juce_dsp.mm */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.objcpp; name = include_juce_dsp.mm; path = ../../JuceLibraryCode/include_juce_dsp.mm; sourceTree = SOURCE_ROOT; };
 		847B25575B573148539D8F02 /* include_juce_gui_basics.mm */ /* include_juce_gui_basics.mm */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.objcpp; name = include_juce_gui_basics.mm; path = ../../JuceLibraryCode/include_juce_gui_basics.mm; sourceTree = SOURCE_ROOT; };
 		8F8A72C3492B3089CD04E8AB /* LowPass.h */ /* LowPass.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = LowPass.h; path = ../../Source/LowPass.h; sourceTree = SOURCE_ROOT; };
 		920B6BC03D3FD14B7AC1575B /* sensel_serial_linux.c */ /* sensel_serial_linux.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; name = sensel_serial_linux.c; path = ../../Source/SenselWrapper/lib/sensel_serial_linux.c; sourceTree = SOURCE_ROOT; };
@@ -113,6 +115,7 @@
 		C0440EAF370055F0DC48AFB7 /* juce_events */ /* juce_events */ = {isa = PBXFileReference; lastKnownFileType = folder; name = juce_events; path = ../../../newJUCE/JUCE/modules/juce_events; sourceTree = SOURCE_ROOT; };
 		C35EE6064AA7AF8821B788F4 /* sensel_types.h */ /* sensel_types.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = sensel_types.h; path = ../../Source/SenselWrapper/lib/sensel_types.h; sourceTree = SOURCE_ROOT; };
 		C4A937F0636AF13ACBDA282C /* Info-App.plist */ /* Info-App.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; name = "Info-App.plist"; path = "Info-App.plist"; sourceTree = SOURCE_ROOT; };
+		C56F86B4A2AD2846B0A8D29F /* juce_dsp */ /* juce_dsp */ = {isa = PBXFileReference; lastKnownFileType = folder; name = juce_dsp; path = ../../../../../newJUCE/JUCE/modules/juce_dsp; sourceTree = SOURCE_ROOT; };
 		C5E674D76B5CA3B9CA1D5518 /* WebKit.framework */ /* WebKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = WebKit.framework; path = System/Library/Frameworks/WebKit.framework; sourceTree = SDKROOT; };
 		C81F14BFFFFB322F40B60E11 /* LipModel.h */ /* LipModel.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = LipModel.h; path = ../../Source/LipModel.h; sourceTree = SOURCE_ROOT; };
 		CDB4FA6D53E779C8984D7F26 /* Tube.h */ /* Tube.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = Tube.h; path = ../../Source/Tube.h; sourceTree = SOURCE_ROOT; };
@@ -174,6 +177,7 @@
 				6D4014B8CE460F5237CA39F9,
 				F417F133F04E298207AE7BBF,
 				7DA68134570697767EF63D17,
+				83711E0069414A76023C2B73,
 				6E44945A77A7798A0313F294,
 				E06AABE1039E852F22DA5AD8,
 				847B25575B573148539D8F02,
@@ -204,6 +208,7 @@
 				10BA23AEE8A5DB9DDF1AC6A1,
 				67BF88D6F3C144285F08A527,
 				5CA54F53F0C1AAD642C9D6D6,
+				C56F86B4A2AD2846B0A8D29F,
 				C0440EAF370055F0DC48AFB7,
 				3371B6A103B1ECDEC43A0235,
 				1DB1A097066BEDA08A5062A9,
@@ -421,6 +426,7 @@
 				93AAAD400465C960DC988FF3,
 				7EF04DABD46FF2EE691A9AAE,
 				5B4C04E5A0B99587826E4404,
+				F6319C7875ED2394B6F75997,
 				F948AECA6E017404B4A4EF51,
 				8CE1C382CC763626824A5109,
 				3983B3E74291A6192CB3D748,

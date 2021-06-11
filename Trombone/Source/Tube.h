@@ -43,15 +43,15 @@ public:
     float getOutput() {
 //        if (setting)
 //        {
-        outputVal = 0;
-        for (int i = 0; i < floor(numOutputPoints); ++i)
-            outputVal += wp[1][Mw-i];
-        
-        if (numOutputPoints - floor(numOutputPoints) != 0)
-            outputVal +=wp[1][Mw-static_cast<int>(ceil(numOutputPoints))] * (numOutputPoints - floor(numOutputPoints));
-        return outputVal / numOutputPoints;
+//        outputVal = 0;
+//        for (int i = 0; i < floor(numOutputPoints); ++i)
+//            outputVal += wp[1][Mw-i];
+//
+//        if (numOutputPoints - floor(numOutputPoints) != 0)
+//            outputVal +=wp[1][Mw-static_cast<int>(ceil(numOutputPoints))] * (numOutputPoints - floor(numOutputPoints));
+//        return outputVal / numOutputPoints;
 //        } else {
-//            return wp[1][Mw];
+        return wp[1][Mw];
 //        }
 //    return getP (1, maxM + Mw + 1);
     };
@@ -130,6 +130,9 @@ public:
     void changeSetting (bool b) { setting = b; };
     
     void calculateVRel(); // experimental bowing
+    
+    double getBellRad() { return radii[radii.size()-1]; };
+    
 private:
     double k, h, c, lambda, rho, L, T;
     int Nint, NintPrev, M, Mw, maxM, maxMw;

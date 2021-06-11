@@ -92,8 +92,8 @@ void MainComponent::prepareToPlay (int samplesPerBlockExpected, double sampleRat
 
     trombone->setExtVals (pressureVal, lipFreqVal, LVal, true);
     
-    lowPass = std::make_unique<LowPass> (std::vector<double> { 0.0004, 0.0017, 0.0025, 0.0017, 0.0004 },
-                                          std::vector<double> { 1, -3.1806, 3.8612, -2.1122, 0.4383 });
+    lowPass = std::make_unique<LowPass> (std::vector<double> { 0.0001343, 0.0005374, 0.0008060, 0.0005374, 0.0001343 },
+                                          std::vector<double> {1, -3.3964, 4.3648, -2.5119, 0.5456 });
     if (~Global::useMicInput)
     {
         pressureSlider.setRange (0, 6000);
@@ -139,7 +139,7 @@ void MainComponent::getNextAudioBlock (const AudioSourceChannelInfo& bufferToFil
         trombone->calculate();
         output = trombone->getOutput() * 0.001 * Global::oOPressureMultiplier;
 //        if (setting)
-//            output = lowPass->filter (output);
+        output = lowPass->filter (output);
 //        if (t == 100) // stop lipexcitation
 //            trombone->setExtVals (0, lipFreqVal, LVal);-
         if (t == 5000)

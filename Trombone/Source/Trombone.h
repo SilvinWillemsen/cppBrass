@@ -53,6 +53,8 @@ public:
     double getTubeRho()  { return tube->getRho(); };
 
     void setWait (bool w) { shouldWait = w; };
+    
+    double getBellRad() { tube->getBellRad(); };
 private:
     std::unique_ptr<Tube> tube;
     std::unique_ptr<LipModel> lipModel;
